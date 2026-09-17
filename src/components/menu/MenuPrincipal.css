@@ -1,0 +1,132 @@
+.menu-container-clean {
+  max-width: 1040px;
+  width: 100%;
+  margin: auto;
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Grid de Tarjetas */
+.cards-grid-clean {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.card-game-clean {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-game-clean:hover {
+
+  box-shadow: var(--shadow-hover);
+}
+
+/* Detalles Celeste */
+.card-game-clean.card-celeste:hover {
+  border-color: var(--celeste-border);
+}
+
+.card-game-clean.card-celeste .btn-play-label {
+  background: var(--celeste);
+  color: #ffffff;
+}
+
+.card-game-clean.card-celeste:hover .btn-play-label {
+  background: var(--celeste-hover);
+}
+
+/* Detalles Rosa */
+.card-game-clean.card-rosa:hover {
+  border-color: var(--rosa-border);
+}
+
+.card-game-clean.card-rosa .btn-play-label {
+  background: var(--rosa);
+  color: #ffffff;
+}
+
+.card-game-clean.card-rosa:hover .btn-play-label {
+  background: var(--rosa-hover);
+}
+
+/* Imagen Cover */
+.card-cover {
+  width: 100%;
+  height: 160px;
+  background: #f1f5f9;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.card-game-clean:hover .card-cover-img {
+  transform: scale(1.08);
+}
+
+/* Si no hay cover, usar el icon antiguo */
+.card-top-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+/* Cuerpo de la tarjeta */
+.card-body {
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.card-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+  text-align: center;
+  margin: 0;
+}
+
+/* Botón Jugar */
+.card-footer-btn {
+  margin-top: auto;
+  width: 100%;
+}
+
+.btn-play-label {
+  display: block;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 10px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  user-select: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

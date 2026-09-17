@@ -1,0 +1,229 @@
+.memorama-wrapper {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.memorama-content {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.memorama-board-card {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.reset-btn {
+  width: auto;
+  padding: 5px 14px;
+  background: #ffffff;
+  border: 2px solid var(--rosa);
+  color: var(--rosa-hover);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.82rem;
+
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.reset-btn:hover {
+  background: var(--rosa-light);
+  border-color: var(--rosa-hover);
+
+}
+
+/* Cuadrículas que crecen HORIZONTALMENTE (solo 2 filas de altura) */
+.cartas-grid {
+  display: grid;
+  perspective: 1000px;
+  justify-content: center;
+}
+
+.cartas-grid.grid-facil {
+  grid-template-columns: repeat(4, 95px);
+  grid-template-rows: repeat(2, 95px);
+  gap: 10px;
+}
+
+.cartas-grid.grid-medio {
+  grid-template-columns: repeat(6, 88px);
+  grid-template-rows: repeat(2, 90px);
+  gap: 8px;
+}
+
+.cartas-grid.grid-dificil {
+  grid-template-columns: repeat(8, 76px);
+  grid-template-rows: repeat(2, 85px);
+  gap: 8px;
+}
+
+/* Carta Memorama */
+.memorama-card {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  user-select: none;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+  border-radius: 14px;
+}
+
+.memorama-card.flipped .card-inner,
+.memorama-card.matched .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-back,
+.card-front {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* Reverso de la carta: tonos pastel celeste y rosa */
+.card-back {
+  background: linear-gradient(135deg, #e0f2fe 0%, #fce7f3 100%);
+  border: 2px solid var(--celeste-border);
+  color: var(--celeste-hover);
+  transition: all 0.2s ease;
+}
+
+.memorama-card:hover .card-back {
+  border-color: var(--rosa-border);
+}
+
+.card-back-text {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: var(--rosa-hover);
+  letter-spacing: 0.5px;
+}
+
+/* Frente de la carta revelada */
+.card-front {
+  background: #ffffff;
+  border: 2px solid var(--border-light);
+  transform: rotateY(180deg);
+  gap: 4px;
+}
+
+.memorama-card.matched .card-front {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.card-symbol {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--rosa-hover);
+  line-height: 1;
+}
+
+.card-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+@media (max-width: 600px) {
+  .cartas-grid.grid-facil,
+  .cartas-grid.grid-medio,
+  .cartas-grid.grid-dificil {
+    grid-template-columns: repeat(4, 75px);
+    gap: 8px;
+  }
+  .cartas-grid.grid-facil {
+    grid-template-rows: repeat(2, 95px);
+  }
+  .cartas-grid.grid-medio {
+    grid-template-rows: repeat(3, 90px);
+  }
+  .cartas-grid.grid-dificil {
+    grid-template-rows: repeat(4, 85px);
+  }
+  .card-symbol {
+    font-size: 1.8rem;
+  }
+}
+
+/* Configuracion */
+.config-screen {
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding-top: 40px;
+}
+
+.config-box {
+  width: 100%;
+  max-width: 480px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.config-box h2 {
+  text-align: center;
+  color: var(--text-main);
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.config-section label {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.time-warning {
+  color: #ef4444;
+  font-weight: 800;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); color: #dc2626; }
+  100% { transform: scale(1); }
+}

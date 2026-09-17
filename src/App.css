@@ -1,0 +1,176 @@
+.clean-app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+}
+
+.clean-navbar {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 24px;
+  height: 62px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-light);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+.clean-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+
+.clean-brand:hover {
+
+}
+
+.brand-logo-img {
+  height: 48px;
+  width: auto;
+  max-width: 68px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(14, 165, 233, 0.22));
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.clean-brand:hover .brand-logo-img {
+  transform: scale(1.08) rotate(-2deg);
+}
+
+.brand-title {
+  display: inline-flex;
+  align-items: baseline;
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -0.4px;
+  font-family: var(--font-heading);
+  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  background: linear-gradient(90deg, #0ea5e9, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-letter {
+  display: inline-block;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.clean-brand:hover .brand-letter {
+  filter: brightness(1.12);
+}
+
+.brand-space {
+  display: inline-block;
+  width: 7px;
+}
+
+@media (max-width: 640px) {
+  .clean-navbar {
+    padding: 12px 16px;
+  }
+
+  .brand-logo-img {
+    height: 38px;
+    max-width: 52px;
+  }
+
+  .brand-title {
+    font-size: 1.1rem;
+    letter-spacing: -0.2px;
+  }
+
+  .brand-space {
+    width: 4px;
+  }
+}
+
+/* Controles del Juego Activo en la Barra Superior */
+.navbar-game-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-game-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 750;
+  letter-spacing: -0.2px;
+}
+
+.navbar-game-pill.tema-celeste {
+  border: 2px solid var(--celeste);
+  color: var(--celeste-hover);
+}
+
+.navbar-game-pill.tema-rosa {
+  border: 2px solid var(--rosa);
+  color: var(--rosa-hover);
+}
+
+/* Botón Volver al Menú en la Barra: Blanco plano con borde celeste, sin gloss */
+.btn-nav-volver {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+.btn-nav-volver:hover {
+  background: #f8fafc;
+  color: var(--celeste-hover);
+  border-color: var(--celeste-border);
+
+}
+
+/* Contenido Principal con límite de 100% viewport */
+.clean-main-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  padding: 20px;
+  width: 100%;
+  animation: cleanFadeIn 0.22s ease-out;
+  box-sizing: border-box;
+}
+
+@keyframes cleanFadeIn {
+  from {
+    opacity: 0;
+
+  }
+  to {
+    opacity: 1;
+
+  }
+}

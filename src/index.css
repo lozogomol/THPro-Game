@@ -1,0 +1,137 @@
+:root {
+  /* Paleta limpia: fondo blanco con detalles en rosa y celeste */
+  --bg-main: #ffffff;
+  --bg-surface: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #ffffff;
+  
+  --celeste: #0ea5e9;
+  --celeste-hover: #0284c7;
+  --celeste-light: #e0f2fe;
+  --celeste-border: #bae6fd;
+  --celeste-glow: rgba(14, 165, 233, 0.25);
+  
+  --rosa: #ec4899;
+  --rosa-hover: #db2777;
+  --rosa-light: #fce7f3;
+  --rosa-border: #fbcfe8;
+  --rosa-glow: rgba(236, 72, 153, 0.25);
+
+  --gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #ec4899 100%);
+  --gradient-soft: linear-gradient(135deg, #f0f9ff 0%, #fdf2f8 100%);
+
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #94a3b8;
+  --border-light: #e2e8f0;
+  --border-hover: #cbd5e1;
+
+  --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 8px 20px -4px rgba(14, 165, 233, 0.08), 0 6px 12px -3px rgba(236, 72, 153, 0.06);
+  --shadow-lg: 0 16px 32px -6px rgba(14, 165, 233, 0.12), 0 10px 18px -4px rgba(236, 72, 153, 0.1);
+  --shadow-hover: 0 20px 40px -8px rgba(14, 165, 233, 0.2), 0 12px 24px -6px rgba(236, 72, 153, 0.18);
+
+  --font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  color-scheme: light;
+  font-family: var(--font-body);
+  color: var(--text-main);
+  background-color: var(--bg-main);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  background-color: #ffffff;
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+#root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Scrollbar moderno suave */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Estilo Global Unificado para Botones: Fondo blanco plano con borde de color, SIN GLOSS */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: 2px solid var(--celeste);
+  background: #ffffff;
+  color: var(--celeste-hover);
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+button:hover {
+  background: var(--celeste-light);
+  border-color: var(--celeste-hover);
+  color: var(--celeste-hover);
+
+}
+
+button:active {
+  background: #bae6fd;
+
+}
+
+/* Variante Rosa */
+.btn-style-rosa,
+button.btn-rosa {
+  border-color: var(--rosa);
+  color: var(--rosa-hover);
+
+}
+
+.btn-style-rosa:hover,
+button.btn-rosa:hover {
+  background: var(--rosa-light);
+  border-color: var(--rosa-hover);
+  color: var(--rosa-hover);
+
+}
+
+.btn-style-rosa:active,
+button.btn-rosa:active {
+  background: #fbcfe8;
+
+}
