@@ -91,6 +91,15 @@ class SoundManager {
     }
   }
 
+  playError() {
+    this.playLocked();
+  }
+
+  playMatch() {
+    this.playSwap();
+  }
+
+
   playVictory() {
     try {
       const ctx = this.getContext();

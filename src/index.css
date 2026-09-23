@@ -102,16 +102,10 @@ button {
   gap: 6px;
 }
 
-button:hover {
+button:hover, button:active {
   background: var(--celeste-light);
   border-color: var(--celeste-hover);
   color: var(--celeste-hover);
-
-}
-
-button:active {
-  background: #bae6fd;
-
 }
 
 /* Variante Rosa */
@@ -119,19 +113,13 @@ button:active {
 button.btn-rosa {
   border-color: var(--rosa);
   color: var(--rosa-hover);
-
 }
 
 .btn-style-rosa:hover,
-button.btn-rosa:hover {
+.btn-style-rosa:active,
+button.btn-rosa:hover,
+button.btn-rosa:active {
   background: var(--rosa-light);
   border-color: var(--rosa-hover);
   color: var(--rosa-hover);
-
-}
-
-.btn-style-rosa:active,
-button.btn-rosa:active {
-  background: #fbcfe8;
-
 }

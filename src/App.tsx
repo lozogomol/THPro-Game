@@ -6,27 +6,90 @@ import Rompecabezas from './components/rompecabezas/Rompecabezas';
 import Memorama from './components/memorama/Memorama';
 import Reflejos from './components/reflejos/Reflejos';
 import Secuencia from './components/secuencia/Secuencia';
+import RegistroJugador from './components/registro/RegistroJugador';
+import PanelAdmin from './components/registro/PanelAdmin';
 
 export type JuegoId = 'rompecabezas' | 'memorama' | 'reflejos' | 'secuencia' | null;
 
 const JUEGOS_INFO: Record<string, { titulo: string; tema: 'celeste' | 'rosa' }> = {
-  rompecabezas: { titulo: 'Rompecabezas Visual', tema: 'celeste' },
-  memorama: { titulo: 'Memorama de Parejas', tema: 'rosa' },
-  reflejos: { titulo: 'Reflejos y Puntería', tema: 'celeste' },
-  secuencia: { titulo: 'Secuencia Mental', tema: 'rosa' },
+  rompecabezas: { titulo: 'Rompecabeza THPro S.R.L.', tema: 'celeste' },
+  memorama: { titulo: 'Memorama THPro S.R.L.', tema: 'rosa' },
+  reflejos: { titulo: 'Reflejos THPro S.R.L.', tema: 'celeste' },
+  secuencia: { titulo: 'Secuencia THPro S.R.L.', tema: 'rosa' },
 };
 
 export default function App() {
   const [juegoSeleccionado, setJuegoSeleccionado] = useState<JuegoId>(null);
+  const [juegoPendiente, setJuegoPendiente] = useState<JuegoId>(null);
+  const [mostrarAdmin, setMostrarAdmin] = useState(false);
+  const [jugadorActivoId, setJugadorActivoId] = useState<string | null>(null);
 
   const handleSeleccionarJuego = (id: string) => {
     if (id === 'rompecabezas' || id === 'memorama' || id === 'reflejos' || id === 'secuencia') {
-      setJuegoSeleccionado(id);
+      setJuegoPendiente(id as JuegoId);
+    }
+  };
+
+  const guardarYJugar = (datos: { nombre: string; apellido: string; telefono: string }) => {
+    if (juegoPendiente) {
+      const newId = crypto.randomUUID();
+      const nuevoRegistro = {
+        id: newId,
+        ...datos,
+        juego: juegoPendiente,
+        fecha: new Date().toISOString(),
+        resultado: 'Pendiente',
+        premio: '-'
+      };
+      
+      const guardados = localStorage.getItem('thpro_jugadores');
+      const lista = guardados ? JSON.parse(guardados) : [];
+      lista.push(nuevoRegistro);
+      localStorage.setItem('thpro_jugadores', JSON.stringify(lista));
+
+      setJugadorActivoId(newId);
+      setJuegoSeleccionado(juegoPendiente);
+      setJuegoPendiente(null);
+    }
+  };
+
+  const handleResultado = (victoria: boolean, premio: string) => {
+    if (!jugadorActivoId) return;
+    const guardados = localStorage.getItem('thpro_jugadores');
+    if (guardados) {
+      const lista = JSON.parse(guardados);
+      const idx = lista.findIndex((j: any) => j.id === jugadorActivoId);
+      if (idx !== -1) {
+        lista[idx].resultado = victoria ? 'Ganó' : 'Perdió';
+        lista[idx].premio = victoria ? premio : '-';
+        localStorage.setItem('thpro_jugadores', JSON.stringify(lista));
+      }
     }
   };
 
   const handleVolverAlMenu = () => {
+    if (juegoSeleccionado) {
+      if (!window.confirm('¿Estás seguro de salir? Si estás jugando perderás tu progreso.')) {
+        return;
+      }
+    }
     setJuegoSeleccionado(null);
+    setJugadorActivoId(null);
+  };
+  
+  const forzarVolverAlMenu = () => {
+    setJuegoSeleccionado(null);
+    setJugadorActivoId(null);
+  };
+
+  const handleLogoDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const pwd = window.prompt('Ingrese la contraseña de administrador:');
+    if (pwd === 'THPro') {
+      setMostrarAdmin(true);
+    } else if (pwd !== null) {
+      alert('Contraseña incorrecta.');
+    }
   };
 
   return (
@@ -39,8 +102,13 @@ export default function App() {
             onClick={handleVolverAlMenu}
             title="Ir al inicio"
           >
-            <img src={logoImg} alt="Logo THPro" className="brand-logo-img" />
-            <span className="brand-title">Minijuegos THPro</span>
+            <img 
+              src={logoImg} 
+              alt="Logo THPro" 
+              className="brand-logo-img" 
+              onDoubleClick={handleLogoDoubleClick}
+            />
+            <span className="brand-title">Minijuegos THPro S.R.L.</span>
           </div>
         ) : (
           <div className="navbar-game-area" style={{ width: '100%', justifyContent: 'space-between' }}>
@@ -60,25 +128,37 @@ export default function App() {
       {/* Renderizado del juego seleccionado o menú */}
       <main className="clean-main-content">
         {juegoSeleccionado === 'rompecabezas' && (
-          <Rompecabezas onVolver={handleVolverAlMenu} />
+          <Rompecabezas onVolver={forzarVolverAlMenu} onResultado={handleResultado} />
         )}
 
         {juegoSeleccionado === 'memorama' && (
-          <Memorama onVolver={handleVolverAlMenu} />
+          <Memorama onVolver={forzarVolverAlMenu} onResultado={handleResultado} />
         )}
 
         {juegoSeleccionado === 'reflejos' && (
-          <Reflejos onVolver={handleVolverAlMenu} />
+          <Reflejos onVolver={forzarVolverAlMenu} onResultado={handleResultado} />
         )}
 
         {juegoSeleccionado === 'secuencia' && (
-          <Secuencia onVolver={handleVolverAlMenu} />
+          <Secuencia onVolver={forzarVolverAlMenu} onResultado={handleResultado} />
         )}
 
         {!juegoSeleccionado && (
           <MenuPrincipal onSeleccionarJuego={handleSeleccionarJuego} />
         )}
       </main>
+
+      {/* Modales Globales */}
+      {juegoPendiente && (
+        <RegistroJugador 
+          onSubmit={guardarYJugar} 
+          onCancelar={() => setJuegoPendiente(null)} 
+        />
+      )}
+
+      {mostrarAdmin && (
+        <PanelAdmin onCerrar={() => setMostrarAdmin(false)} />
+      )}
     </div>
   );
 }

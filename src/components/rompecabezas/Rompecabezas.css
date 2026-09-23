@@ -1,15 +1,61 @@
+/* =========================================
+   1. LAYOUT PRINCIPAL Y MÁRGENES (5mm)
+   ========================================= */
+
+/* Limitador estricto de margen de 5mm en los 4 lados */
 .rompecabezas-wrapper {
   max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0;
+  /* Garantiza 5mm libres a izquierda y derecha restando 10mm del 100% */
+  width: calc(100% - 10mm); 
+  /* Asegura 5mm libres arriba y abajo con respecto a tu barra de menú */
+  margin: 5mm auto; 
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   gap: 16px;
   box-sizing: border-box;
+  
+  /* Agregado para que se expanda en todo el espacio disponible */
+  flex: 1;
+  min-height: 0;
 }
 
-/* Barra de Opciones Superior Compacta */
+/* Layout Dinámico para la Pantalla de Configuración */
+.config-screen-layout {
+  width: 100%;
+  display: flex;
+  gap: 5mm;
+  padding: 5mm;
+  box-sizing: border-box;
+  align-items: stretch;
+}
+
+.config-box-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+
+/* Modo Vertical (Portrait) - Uno arriba del otro */
+@media (orientation: portrait) {
+  .config-screen-layout {
+    flex-direction: column;
+  }
+}
+
+/* Modo Horizontal (Landscape) - Uno al lado del otro */
+@media (orientation: landscape) {
+  .config-screen-layout {
+    flex-direction: row;
+  }
+}
+
+/* =========================================
+   2. BARRA SUPERIOR Y MÉTRICAS
+   ========================================= */
+
 .game-topbar {
   display: flex;
   justify-content: center;
@@ -18,11 +64,9 @@
   background: #ffffff;
   border-radius: 12px;
   border: 1px solid var(--border-light);
-
   gap: 8px;
 }
 
-/* Selector de Dificultad */
 .difficulty-pill-group {
   display: flex;
   background: #f1f5f9;
@@ -40,7 +84,6 @@
   background: #ffffff;
   border: 1.5px solid transparent;
   transition: all 0.2s ease;
-
 }
 
 .diff-btn:hover {
@@ -52,33 +95,39 @@
   background: #ffffff;
   color: var(--celeste-hover);
   border: 2px solid var(--celeste);
-
 }
 
-/* Layout Compacto */
 .game-layout {
-  display: grid;
-  grid-template-columns: auto 260px;
-  gap: 16px;
-  align-items: center;
+  display: flex;
   justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  /* Flexibilidad total como memorama */
+  flex: 1;
+  min-height: 0;
 }
 
-/* Contenedor del Tablero */
 .board-container-card {
   background: #ffffff;
   border: 1px solid var(--border-light);
   border-radius: 16px;
-  padding: 24px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  /* Flexibilidad total para que encoja */
+  flex: 1;
+  min-height: 0;
 }
 
 .metrics-strip {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 16px;
   width: 100%;
   justify-content: center;
@@ -89,6 +138,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   background: #f8fafc;
   padding: 6px 16px;
   border-radius: 10px;
@@ -125,7 +175,52 @@
   color: var(--rosa-hover);
 }
 
-/* Portada Previa con Rompecabezas.png antes de dar a Jugar */
+.time-warning {
+  color: #ef4444;
+  animation: pulse-time 1s infinite alternate;
+}
+
+@keyframes pulse-time {
+  from { opacity: 1; }
+  to { opacity: 0.5; }
+}
+
+/* =========================================
+   3. TABLERO Y PIEZAS DEL ROMPECABEZAS (RESPONSIVOS)
+   ========================================= */
+
+/* Contenedor extra para obligar al centrado y límites */
+.puzzle-grid-wrapper {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.puzzle-grid-frame {
+  display: grid;
+  gap: 4px;
+  background: transparent;
+  padding: 0;
+  border-radius: 12px;
+  margin: 0 auto;
+  
+  /* Prioriza la altura en pantallas horizontales */
+  height: 100%;
+  width: auto;
+  aspect-ratio: 1 / 1;
+}
+
+/* En modo vertical, priorizamos el ancho en lugar del alto */
+@media (orientation: portrait) {
+  .puzzle-grid-frame {
+    width: 100%;
+    height: auto;
+  }
+}
+
 .puzzle-start-cover {
   position: relative;
   border-radius: 16px;
@@ -166,7 +261,6 @@
   padding: 10px 34px;
   border-radius: 12px;
   cursor: pointer;
-
   transition: all 0.2s ease;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -174,23 +268,6 @@
 
 .btn-start-puzzle:hover {
   background: var(--celeste-light);
-
-
-}
-
-.btn-start-puzzle:active {
-
-}
-
-/* Cuadrícula de Piezas */
-.puzzle-grid-frame {
-  display: grid;
-  gap: 4px;
-  background: #f1f5f9;
-  padding: 8px;
-  border-radius: 16px;
-  border: 2px solid var(--border-light);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .puzzle-piece {
@@ -268,7 +345,10 @@
   color: var(--celeste-hover);
 }
 
-/* Panel Lateral */
+/* =========================================
+   4. COMPONENTES EXTRA (PANEL LATERAL, LISTAS)
+   ========================================= */
+
 .side-panel {
   display: flex;
   flex-direction: column;
@@ -280,7 +360,6 @@
   border: 1px solid var(--border-light);
   border-radius: 14px;
   padding: 10px 14px;
-
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -394,7 +473,10 @@
   text-align: left;
 }
 
-/* Botones de Acción: Fondo blanco con borde celeste / rosa */
+/* =========================================
+   5. BOTONES DE ACCIÓN PRINCIPALES
+   ========================================= */
+
 .btn-primary-action {
   width: 100%;
   padding: 7px 12px;
@@ -404,17 +486,15 @@
   color: var(--celeste-hover);
   font-weight: 750;
   font-size: 0.86rem;
-
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 .btn-primary-action:hover {
   background: var(--celeste-light);
-
-
 }
 
 .btn-secondary-action {
@@ -426,20 +506,21 @@
   color: var(--rosa-hover);
   font-size: 0.84rem;
   font-weight: 700;
-
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 .btn-secondary-action:hover {
   background: var(--rosa-light);
-
-
 }
 
-/* Modales */
+/* =========================================
+   6. MODALES Y PANTALLA DE VICTORIA
+   ========================================= */
+
 .clean-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -455,7 +536,7 @@
 .clean-modal-box {
   background: #ffffff;
   border-radius: 24px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   border: 1px solid var(--border-light);
   max-width: 500px;
   width: 100%;
@@ -491,7 +572,6 @@
   display: block;
 }
 
-/* Modal de Victoria */
 .victory-box {
   padding: 36px 28px;
   text-align: center;
@@ -513,15 +593,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
 }
 
 .victory-box h2 {
   font-size: 1.6rem;
   font-weight: 800;
-  background: var(--gradient-accent);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-main);
 }
 
 .victory-box p {
@@ -535,7 +612,6 @@
   border-radius: 16px;
   overflow: hidden;
   border: 2px solid var(--celeste);
-
 }
 
 .victory-solved-thumb img {
@@ -583,13 +659,25 @@
   margin-top: 6px;
 }
 
-@media (max-width: 860px) {
-  .game-layout {
-    grid-template-columns: 1fr;
-    justify-items: center;
+/* =========================================
+   7. AJUSTES FINALES PARA MÓVILES
+   ========================================= */
+
+@media (max-width: 768px) {
+  .board-container-card {
+    padding: 12px;
+    gap: 10px;
   }
-  .side-panel {
-    width: 100%;
-    max-width: 440px;
+  
+  .metrics-strip {
+    gap: 8px;
+  }
+  
+  .metric-chip {
+    padding: 4px 12px;
+  }
+  
+  .config-box-item {
+    padding: 16px;
   }
 }

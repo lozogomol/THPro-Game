@@ -1,8 +1,8 @@
 .memorama-wrapper {
-  max-width: 1200px;
   width: 100%;
+  flex: 1;
   margin: 0 auto;
-  padding: 0;
+  padding: 5mm;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -13,19 +13,21 @@
   display: flex;
   justify-content: center;
   width: 100%;
+  flex: 1;
 }
 
 .memorama-board-card {
   background: #ffffff;
   border: 1px solid var(--border-light);
   border-radius: 16px;
-  padding: 24px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
   width: 100%;
-  max-width: 1000px;
+  flex: 1;
+  min-height: 0;
 }
 
 .reset-btn {
@@ -37,45 +39,67 @@
   border-radius: 8px;
   font-weight: 700;
   font-size: 0.82rem;
-
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .reset-btn:hover {
   background: var(--rosa-light);
   border-color: var(--rosa-hover);
-
 }
 
-/* Cuadrículas que crecen HORIZONTALMENTE (solo 2 filas de altura) */
+/* Cuadrículas que crecen HORIZONTALMENTE y VERTICALMENTE */
 .cartas-grid {
   display: grid;
   perspective: 1000px;
-  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
-.cartas-grid.grid-facil {
-  grid-template-columns: repeat(4, 95px);
-  grid-template-rows: repeat(2, 95px);
+.cartas-grid.grid-aprendiz {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-.cartas-grid.grid-medio {
-  grid-template-columns: repeat(6, 88px);
-  grid-template-rows: repeat(2, 90px);
+.cartas-grid.grid-talentoso {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
-.cartas-grid.grid-dificil {
-  grid-template-columns: repeat(8, 76px);
-  grid-template-rows: repeat(2, 85px);
+.cartas-grid.grid-maestro {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+@media (orientation: portrait) {
+  .cartas-grid.grid-aprendiz {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+  }
+
+  .cartas-grid.grid-talentoso {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+  }
+
+  .cartas-grid.grid-maestro {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+  }
 }
 
 /* Carta Memorama */
 .memorama-card {
-  width: 100%;
   height: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  aspect-ratio: 3 / 4;
   cursor: pointer;
   user-select: none;
 }
@@ -186,8 +210,13 @@
 }
 
 .config-box {
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
   width: 100%;
-  max-width: 480px;
+  max-width: 100%;
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);

@@ -7,8 +7,7 @@ import esteticaCorporalImg from '../../assets/Estetica_Corporal.png';
 import fisioterapiaImg from '../../assets/Fisioterapia.png';
 import gimnasiaLaboralImg from '../../assets/Gimnasia_Laboral.png';
 
-export type DificultadSecuencia = 'facil' | 'medio' | 'dificil';
-export type TiempoLimite = 180 | 300;
+export type DificultadSecuencia = 'aprendiz' | 'talentoso' | 'maestro';
 
 interface Pad {
   id: number;
@@ -26,17 +25,25 @@ const PADS: Pad[] = [
 
 interface SecuenciaProps {
   onVolver: () => void;
+  onResultado: (victoria: boolean, premio: string) => void;
 }
 
-export default function Secuencia({ onVolver }: SecuenciaProps) {
-  const [pantalla, setPantalla] = useState<'config' | 'juego'>('juego');
-  const [dificultad, setDificultad] = useState<DificultadSecuencia>('dificil');
-  const [limiteTiempo, setLimiteTiempo] = useState<TiempoLimite>(300);
+export default function Secuencia({ onVolver, onResultado }: SecuenciaProps) {
+  const [pantalla, setPantalla] = useState<'config' | 'juego'>('config');
+  const [dificultad, setDificultad] = useState<DificultadSecuencia>('talentoso');
+  const [limiteTiempo, setLimiteTiempo] = useState<number>(120);
+
+  const getPremio = (dif: string) => {
+    if (dif === 'facil' || dif === 'aprendiz') return '';
+    if (dif === 'medio' || dif === 'talentoso') return 'Un Premio';
+    if (dif === 'dificil' || dif === 'maestro') return 'Masaje Exprés';
+    return '';
+  };
 
   const config = {
-    facil: { metaRondas: 5, intervaloMs: 650 },
-    medio: { metaRondas: 8, intervaloMs: 500 },
-    dificil: { metaRondas: 12, intervaloMs: 380 }
+    aprendiz: { metaRondas: 6, intervaloMs: 650 },
+    talentoso: { metaRondas: 10, intervaloMs: 500 },
+    maestro: { metaRondas: 14, intervaloMs: 380 }
   }[dificultad];
 
   const [secuencia, setSecuencia] = useState<number[]>([]);
@@ -46,7 +53,8 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
   const [rondaActual, setRondaActual] = useState<number>(1);
   const [tiempoSegundos, setTiempoSegundos] = useState<number>(0);
 
-  const [haGanado, setHaGanado] = useState<boolean>(false);
+  const [, setFallos] = useState<number>(0);
+    const [haGanado, setHaGanado] = useState<boolean>(false);
   const [haFallado, setHaFallado] = useState<boolean>(false);
   const [haPerdidoTiempo, setHaPerdidoTiempo] = useState<boolean>(false);
   const [enJuego, setEnJuego] = useState<boolean>(false);
@@ -79,18 +87,19 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
     }
   }, [pantalla]);
 
-  const iniciarJuego = () => {
+  const iniciarJuego = (forcedTime?: number) => {
     soundManager.playClick();
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     if (timerRef.current) clearInterval(timerRef.current);
 
-    setHaGanado(false);
+    setFallos(0);
+      setHaGanado(false);
     setHaFallado(false);
     setHaPerdidoTiempo(false);
     setPasoUsuario(0);
     setTurnoJugador(false);
     setRondaActual(1);
-    setTiempoSegundos(limiteTiempo > 0 ? limiteTiempo : 0);
+    setTiempoSegundos(forcedTime !== undefined ? forcedTime : (limiteTiempo > 0 ? limiteTiempo : 0));
     setEnJuego(true);
     setPantalla('juego');
 
@@ -99,17 +108,6 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
     setSecuencia(nuevaSecuencia);
     setTimeout(() => {
       reproducirSecuencia(nuevaSecuencia);
-    }, 500);
-  };
-
-  const reintentarRonda = () => {
-    soundManager.playClick();
-    setHaFallado(false);
-    setTurnoJugador(false);
-    setPasoUsuario(0);
-    setEnJuego(true);
-    setTimeout(() => {
-      reproducirSecuencia(secuencia);
     }, 500);
   };
 
@@ -122,6 +120,7 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
               setHaPerdidoTiempo(true);
               setEnJuego(false);
               setTurnoJugador(false);
+              onResultado(false, '');
               if (timerRef.current) clearInterval(timerRef.current);
               return 0;
             }
@@ -134,7 +133,7 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
       if (timerRef.current) clearInterval(timerRef.current);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [enJuego, haFallado, haGanado, haPerdidoTiempo, limiteTiempo]);
+  }, [enJuego, haFallado, haGanado, haPerdidoTiempo, limiteTiempo, onResultado]);
 
   const handlePadClick = (id: number) => {
     if (!turnoJugador || haGanado || haFallado || haPerdidoTiempo) return;
@@ -151,6 +150,7 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
           setHaGanado(true);
           setTurnoJugador(false);
           setEnJuego(false);
+          onResultado(true, getPremio(dificultad));
           soundManager.playVictory();
         } else {
           setTurnoJugador(false);
@@ -165,8 +165,22 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
       }
     } else {
       soundManager.playLocked();
-      setHaFallado(true);
-      setTurnoJugador(false);
+      setFallos(prev => {
+        const nuevosFallos = prev + 1;
+        if (nuevosFallos >= 2) {
+          setHaFallado(true);
+          setTurnoJugador(false);
+          setEnJuego(false);
+          onResultado(false, '');
+          if (timerRef.current) clearInterval(timerRef.current);
+          return nuevosFallos;
+        }
+        // Resume! Repeat sequence for them
+        setTurnoJugador(false);
+        setPasoUsuario(0);
+        setTimeout(() => reproducirSecuencia(secuencia), 500);
+        return nuevosFallos;
+      });
     }
   };
 
@@ -176,51 +190,76 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
     return `${mins.toString().padStart(2, '0')}:${segs.toString().padStart(2, '0')}`;
   };
 
+  const handleSeleccionarNivel = (nivel: DificultadSecuencia) => {
+    const tiempos = { aprendiz: 40, talentoso: 100, maestro: 160 };
+    setDificultad(nivel);
+    setLimiteTiempo(tiempos[nivel]);
+    setSecuencia([]);
+    setEnJuego(false);
+    setHaGanado(false);
+    setHaFallado(false);
+    setHaPerdidoTiempo(false);
+    setPantalla('juego');
+    iniciarJuego(tiempos[nivel]);
+  };
+
   if (pantalla === 'config') {
     return (
-      <div className="secuencia-wrapper config-screen">
+      <div className="secuencia-wrapper config-screen" style={{ padding: '5mm' }}>
         <div className="config-box clean-modal-box">
-          <h2>Configuración de Secuencia</h2>
+          <h2 style={{ textAlign: 'center' }}>Nivel de Secuencia<br />THPro S.R.L.</h2>
           <div className="config-section">
-            <label>Dificultad:</label>
-            <div className="difficulty-pill-group">
-              <button className={`diff-btn ${dificultad === 'facil' ? 'active' : ''}`} onClick={() => setDificultad('facil')}>Fácil (5 rondas)</button>
-              <button className={`diff-btn ${dificultad === 'medio' ? 'active' : ''}`} onClick={() => setDificultad('medio')}>Medio (8 rondas)</button>
-              <button className={`diff-btn ${dificultad === 'dificil' ? 'active' : ''}`} onClick={() => setDificultad('dificil')}>Difícil (12 rondas)</button>
+            <div className="difficulty-pill-group" style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+              <button className="btn-primary-action" onClick={() => handleSeleccionarNivel('aprendiz')}>Aprendiz</button>
+              <button className="btn-primary-action" onClick={() => handleSeleccionarNivel('talentoso')}>Talentoso</button>
+              <button className="btn-primary-action" onClick={() => handleSeleccionarNivel('maestro')}>Maestro</button>
             </div>
           </div>
-          <div className="config-section">
-            <label>Tiempo Límite:</label>
-            <div className="difficulty-pill-group">
-              <button className={`diff-btn ${limiteTiempo === 180 ? 'active' : ''}`} onClick={() => setLimiteTiempo(180)}>3 Min</button>
-              <button className={`diff-btn ${limiteTiempo === 300 ? 'active' : ''}`} onClick={() => setLimiteTiempo(300)}>5 Min</button>
+          <div className="victory-btn-group" style={{ marginTop: '20px' }}>
+              <button className="btn-secondary-action" onClick={onVolver}>Volver al Menú</button>
             </div>
-          </div>
-          <div className="victory-btn-group" style={{ marginTop: '30px' }}>
-            <button className="btn-primary-action" onClick={iniciarJuego}>¡Jugar!</button>
-            <button className="btn-secondary-action" onClick={onVolver}>Volver al Menú</button>
-          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="secuencia-wrapper">
+    <div className="secuencia-wrapper" style={{ position: "relative", width: "100%", minHeight: "100%" }}>
+      
+      
+
       <div className="secuencia-content">
-        <div className="secuencia-card">
-          <div className="metrics-strip">
+        <div className="secuencia-card" style={{ position: 'relative' }}>
+  
+
+          
+      <div className="metrics-strip">
+
+            <div 
+              className="metric-chip config-chip" 
+              onClick={() => { setPantalla('config'); setEnJuego(false); }} 
+              style={{ cursor: 'pointer', order: 99 }}
+              title="Volver a Configuración"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-main)' }}>
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+
+            
+
             <div className="metric-chip">
               <span className="metric-label">Ronda</span>
               <span className="metric-val">{rondaActual} / {config.metaRondas}</span>
-            </div>
-            <div className="metric-chip">
+              
+          </div>
+          <div className="metric-chip">
               <span className="metric-label">{limiteTiempo > 0 ? 'Tiempo Restante' : 'Tiempo'}</span>
               <span className={`metric-val ${limiteTiempo > 0 && tiempoSegundos <= 10 ? 'time-warning' : ''}`}>
                 {formatoTiempo(tiempoSegundos)}
               </span>
             </div>
-            <button className="btn-secondary-action reset-btn" onClick={() => setPantalla('config')}>Configurar</button>
           </div>
 
           <div className="turn-banner">
@@ -235,7 +274,7 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
             )}
           </div>
 
-          <div className="simon-board-container" style={{ position: 'relative', width: '100%' }}>
+          <div className="simon-board-container">
             <div className="simon-board" style={{ opacity: haFallado ? 0.3 : 1 }}>
               {PADS.map((pad) => (
                 <button
@@ -254,10 +293,16 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
             </div>
 
             {haFallado && !haPerdidoTiempo && (
-              <div className="fail-overlay">
-                <button className="btn-primary-action retry-btn" onClick={reintentarRonda}>Reintentar Ronda</button>
+        <div className="clean-modal-backdrop victory-backdrop">
+            <div className="clean-modal-box victory-box" style={{ borderColor: '#ef4444' }}>
+              <div className="victory-icon-bubble" style={{ backgroundColor: '#ef4444', color: '#fff' }}>X</div>
+              <h2 style={{ textAlign: "center", margin: "15px 0 25px" }}>¡Perdiste!</h2>
+              <div className="victory-btn-group">
+                <button className="btn-primary-action" onClick={onVolver}>Volver al Menú</button>
               </div>
-            )}
+            </div>
+          </div>
+      )}
           </div>
 
           <p className="mouse-hint">
@@ -272,8 +317,7 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
         <div className="clean-modal-backdrop victory-backdrop">
           <div className="clean-modal-box victory-box">
             <div className="victory-icon-bubble">¡OK!</div>
-            <h2>¡Memoria Prodigiosa!</h2>
-            <p>Has memorizado las {config.metaRondas} rondas con éxito en dificultad <strong>{dificultad.toUpperCase()}</strong>.</p>
+            <h2 style={{ textAlign: "center", color: "var(--rosa-hover)", margin: "10px 0" }}>{getPremio(dificultad) === '' ? '¡Ganaste!' : `¡Ganaste ${getPremio(dificultad)}!`}</h2>
             <div className="victory-summary-stats">
               <div className="summary-col">
                 <span className="sum-label">Rondas Logradas</span>
@@ -285,8 +329,7 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
               </div>
             </div>
             <div className="victory-btn-group">
-              <button className="btn-primary-action" onClick={iniciarJuego}>Jugar de Nuevo</button>
-              <button className="btn-secondary-action" onClick={() => setPantalla('config')}>Volver a Configurar</button>
+              <button className="btn-primary-action" onClick={onVolver}>Volver al Menú</button>
             </div>
           </div>
         </div>
@@ -294,16 +337,14 @@ export default function Secuencia({ onVolver }: SecuenciaProps) {
 
       {haPerdidoTiempo && (
         <div className="clean-modal-backdrop victory-backdrop">
-          <div className="clean-modal-box victory-box" style={{ borderColor: '#ef4444' }}>
-            <div className="victory-icon-bubble" style={{ backgroundColor: '#ef4444', color: '#fff' }}>!</div>
-            <h2>¡Se acabó el tiempo!</h2>
-            <p>Se te acabó el tiempo antes de terminar la secuencia.</p>
-            <div className="victory-btn-group">
-              <button className="btn-primary-action" onClick={iniciarJuego}>Reintentar</button>
-              <button className="btn-secondary-action" onClick={() => setPantalla('config')}>Volver a Configurar</button>
+            <div className="clean-modal-box victory-box" style={{ borderColor: '#ef4444' }}>
+              <div className="victory-icon-bubble" style={{ backgroundColor: '#ef4444', color: '#fff' }}>X</div>
+              <h2 style={{ textAlign: "center", margin: "15px 0 25px" }}>¡Perdiste!</h2>
+              <div className="victory-btn-group">
+                <button className="btn-primary-action" onClick={onVolver}>Volver al Menú</button>
+              </div>
             </div>
           </div>
-        </div>
       )}
     </div>
   );

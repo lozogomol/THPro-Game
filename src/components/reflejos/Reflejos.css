@@ -1,8 +1,8 @@
 .reflejos-wrapper {
-  max-width: 1200px;
   width: 100%;
+  flex: 1;
   margin: 0 auto;
-  padding: 0;
+  padding: 5mm;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -13,26 +13,28 @@
   display: flex;
   justify-content: center;
   width: 100%;
+  flex: 1;
 }
 
 .reflejos-card {
   background: #ffffff;
   border: 1px solid var(--border-light);
   border-radius: 16px;
-  padding: 24px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
   width: 100%;
-  max-width: 1000px;
+  flex: 1;
 }
 
-/* Arena de juego compacta para pantalla 100% */
 .arena-punteria {
   position: relative;
   width: 100%;
-  height: 290px;
+  flex: 1;
+  min-height: 290px;
+  max-height: none;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border: 2px dashed var(--celeste-border);
   border-radius: 14px;

@@ -18,7 +18,7 @@ export interface MinijuegoItem {
 const MINIJUEGOS: MinijuegoItem[] = [
   {
     id: 'rompecabezas',
-    titulo: 'Rompecabezas Visual',
+    titulo: 'Rompecabeza THPro S.R.L.',
     subtitulo: 'Reconstruye imágenes reales en cuadrícula',
     icono: '01',
     dificultades: [],
@@ -27,7 +27,7 @@ const MINIJUEGOS: MinijuegoItem[] = [
   },
   {
     id: 'memorama',
-    titulo: 'Memorama de Parejas',
+    titulo: 'Memorama THPro S.R.L.',
     subtitulo: 'Encuentra las parejas de cartas idénticas',
     icono: '02',
     dificultades: [],
@@ -36,7 +36,7 @@ const MINIJUEGOS: MinijuegoItem[] = [
   },
   {
     id: 'reflejos',
-    titulo: 'Reflejos y Puntería',
+    titulo: 'Reflejos THPro S.R.L.',
     subtitulo: 'Haz clic en los objetivos a máxima velocidad',
     icono: '03',
     dificultades: [],
@@ -45,7 +45,7 @@ const MINIJUEGOS: MinijuegoItem[] = [
   },
   {
     id: 'secuencia',
-    titulo: 'Secuencia Mental',
+    titulo: 'Secuencia THPro S.R.L.',
     subtitulo: 'Memoriza y repite el patrón de luces',
     icono: '04',
     dificultades: [],

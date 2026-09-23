@@ -2,10 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import './Rompecabezas.css';
 import { soundManager } from '../../utils/audio';
 
+// Importamos todas las imágenes solicitadas
 import rn1Img from '../../assets/R-N-1.png';
+import rn2Img from '../../assets/R-N-2.png';
+import rn3Img from '../../assets/R-N-3.png';
+import rn4Img from '../../assets/R-N-4.png';
+import rn5Img from '../../assets/R-N-5.png';
 
 export type DificultadRompecabezas = 'facil' | 'medio' | 'dificil';
-export type TiempoLimite = 180 | 300;
+export type TiempoLimite = number;
 
 export interface ImagenPreset {
   id: string;
@@ -14,10 +19,11 @@ export interface ImagenPreset {
 }
 
 const IMAGENES_PRESET: ImagenPreset[] = [
-  { id: 'rn1-thpro', nombre: 'THPro - Talento Humano', url: rn1Img },
-  { id: 'cyberpunk', nombre: 'Ciudad Neón', url: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800&auto=format&fit=crop&q=80' },
-  { id: 'arcade', nombre: 'Sala Arcade', url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&auto=format&fit=crop&q=80' },
-  { id: 'galaxia', nombre: 'Nebulosa Rosa', url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=800&auto=format&fit=crop&q=80' }
+  { id: 'rn1', nombre: 'THPro - Talento Humano 1', url: rn1Img },
+  { id: 'rn2', nombre: 'THPro - Talento Humano 2', url: rn2Img },
+  { id: 'rn3', nombre: 'THPro - Talento Humano 3', url: rn3Img },
+  { id: 'rn4', nombre: 'THPro - Talento Humano 4', url: rn4Img },
+  { id: 'rn5', nombre: 'THPro - Talento Humano 5', url: rn5Img }
 ];
 
 export interface Pieza {
@@ -27,17 +33,16 @@ export interface Pieza {
 
 interface RompecabezasProps {
   onVolver: () => void;
+  onResultado: (victoria: boolean, premio: string) => void;
 }
 
-export default function Rompecabezas({ onVolver }: RompecabezasProps) {
-  const [pantalla, setPantalla] = useState<'config' | 'juego'>('juego');
+export default function Rompecabezas({ onVolver, onResultado }: RompecabezasProps) {
+  const [pantalla, setPantalla] = useState<'config' | 'juego'>('config');
   const [dificultad, setDificultad] = useState<DificultadRompecabezas>('dificil');
-  const [limiteTiempo, setLimiteTiempo] = useState<TiempoLimite>(300);
-
-  const gridSize = dificultad === 'facil' ? 3 : dificultad === 'medio' ? 4 : 5;
+  const [limiteTiempo, setLimiteTiempo] = useState<TiempoLimite>(80);
+  const [gridSize, setGridSize] = useState<number>(5);
 
   const [imagenActual, setImagenActual] = useState<ImagenPreset>(IMAGENES_PRESET[0]);
-  const [mostrarModalImagen, setMostrarModalImagen] = useState<boolean>(false);
 
   const [piezas, setPiezas] = useState<Pieza[]>([]);
   const [indiceArrastrado, setIndiceArrastrado] = useState<number | null>(null);
@@ -49,6 +54,7 @@ export default function Rompecabezas({ onVolver }: RompecabezasProps) {
   const [enJuego, setEnJuego] = useState<boolean>(false);
   const [haGanado, setHaGanado] = useState<boolean>(false);
   const [haPerdidoTiempo, setHaPerdidoTiempo] = useState<boolean>(false);
+  const [mostrarGuia, setMostrarGuia] = useState<boolean>(false);
 
   const timerRef = useRef<number | null>(null);
 
@@ -58,24 +64,30 @@ export default function Rompecabezas({ onVolver }: RompecabezasProps) {
     }
   }, [pantalla]);
 
-  const iniciarJuego = (tamano: number = gridSize) => {
-    soundManager.playClick();
-    const count = tamano * tamano;
-    let nuevoArray: Pieza[] = [];
-    let estaResuelto = true;
-    while (estaResuelto) {
-      nuevoArray = Array.from({ length: count }, (_, i) => ({ id: i, originalIndex: i })).sort(() => Math.random() - 0.5);
-      estaResuelto = nuevoArray.every((p, idx) => p.originalIndex === idx);
+  const iniciarJuego = (forcedGridSize?: number, forcedTime?: number) => {
+    const size = forcedGridSize || gridSize;
+    const numPiezas = size * size;
+    const indices = Array.from({ length: numPiezas }, (_, i) => i);
+    
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
     }
+
+    const nuevoArray = indices.map((idx, i) => ({
+      id: i,
+      originalIndex: idx
+    }));
+
     setPiezas(nuevoArray);
     setIndiceArrastrado(null);
     setIndiceSobrevolado(null);
     setIndiceSeleccionado(null);
     setMovimientos(0);
-    setTiempoSegundos(limiteTiempo > 0 ? limiteTiempo : 0);
     setHaGanado(false);
     setHaPerdidoTiempo(false);
     setEnJuego(true);
+    setTiempoSegundos(forcedTime !== undefined ? forcedTime : (limiteTiempo > 0 ? limiteTiempo : 0));
     setPantalla('juego');
   };
 
@@ -107,6 +119,13 @@ export default function Rompecabezas({ onVolver }: RompecabezasProps) {
     return `${mins.toString().padStart(2, '0')}:${segs.toString().padStart(2, '0')}`;
   };
 
+  const getPremio = (dif: string) => {
+    if (dif === 'facil' || dif === 'aprendiz') return '';
+    if (dif === 'medio' || dif === 'talentoso') return 'Un Premio';
+    if (dif === 'dificil' || dif === 'maestro') return 'Masaje Exprés';
+    return '';
+  };
+
   const intercambiarPiezas = (origen: number, destino: number) => {
     if (origen === destino) return;
     const nuevasPiezas = [...piezas];
@@ -122,6 +141,7 @@ export default function Rompecabezas({ onVolver }: RompecabezasProps) {
       setHaGanado(true);
       setEnJuego(false);
       soundManager.playVictory();
+      onResultado(true, getPremio(dificultad));
     }
   };
 
@@ -138,19 +158,19 @@ export default function Rompecabezas({ onVolver }: RompecabezasProps) {
   };
 
   const handleDragEnter = (index: number) => {
-    if (indiceArrastrado !== null && indiceArrastrado !== index) {
-      setIndiceSobrevolado(index);
-    }
+    if (haGanado || haPerdidoTiempo) return;
+    setIndiceSobrevolado(index);
   };
 
   const handleDragLeave = () => {
     setIndiceSobrevolado(null);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>, indexDestino: number) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
     e.preventDefault();
-    if (indiceArrastrado === null) return;
-    intercambiarPiezas(indiceArrastrado, indexDestino);
+    if (indiceArrastrado !== null && indiceArrastrado !== dropIndex) {
+      intercambiarPiezas(indiceArrastrado, dropIndex);
+    }
     setIndiceArrastrado(null);
     setIndiceSobrevolado(null);
   };
@@ -162,182 +182,190 @@ export default function Rompecabezas({ onVolver }: RompecabezasProps) {
 
   const handlePiezaClick = (index: number) => {
     if (haGanado || haPerdidoTiempo) return;
+    
     if (indiceSeleccionado === null) {
-      soundManager.playClick();
       setIndiceSeleccionado(index);
-    } else if (indiceSeleccionado === index) {
       soundManager.playClick();
-      setIndiceSeleccionado(null);
     } else {
       intercambiarPiezas(indiceSeleccionado, index);
     }
   };
 
-  const boardPixelSize = 270;
-  const tileSize = Math.floor(boardPixelSize / gridSize);
+  const handleSeleccionarNivel = (nivel: 'facil'|'medio'|'dificil'|string) => {
+    let newGridSize = gridSize;
+    let newTime = limiteTiempo;
+    if (nivel === 'aprendiz') { setDificultad('facil'); setGridSize(3); newGridSize = 3; setLimiteTiempo(60); newTime = 60; }
+    if (nivel === 'talentoso') { setDificultad('medio'); setGridSize(4); newGridSize = 4; setLimiteTiempo(60); newTime = 60; }
+    if (nivel === 'maestro') { setDificultad('dificil'); setGridSize(5); newGridSize = 5; setLimiteTiempo(80); newTime = 80; }
+    setPantalla('juego');
+    iniciarJuego(newGridSize, newTime);
+  };
 
   if (pantalla === 'config') {
     return (
-      <div className="rompecabezas-wrapper config-screen">
-        <div className="config-box clean-modal-box">
-          <h2>Configuración del Rompecabezas</h2>
-          
-          <div className="config-section">
-            <label>Dificultad:</label>
-            <div className="difficulty-pill-group">
-              <button className={`diff-btn ${dificultad === 'facil' ? 'active' : ''}`} onClick={() => setDificultad('facil')}>Fácil (3x3)</button>
-              <button className={`diff-btn ${dificultad === 'medio' ? 'active' : ''}`} onClick={() => setDificultad('medio')}>Medio (4x4)</button>
-              <button className={`diff-btn ${dificultad === 'dificil' ? 'active' : ''}`} onClick={() => setDificultad('dificil')}>Difícil (5x5)</button>
+      <div className="rompecabezas-wrapper config-screen-layout">
+        
+        {/* Contenedor 1: Configuración completa */}
+        <div className="config-box clean-modal-box config-box-item">
+          <h2 style={{ textAlign: 'center' }}>Nivel de Rompecabeza<br />THPro S.R.L.</h2>
+          <div className="config-section" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div className="difficulty-pill-group" style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+              <button className="btn-primary-action" onClick={() => handleSeleccionarNivel('aprendiz')}>Aprendiz</button>
+              <button className="btn-primary-action" onClick={() => handleSeleccionarNivel('talentoso')}>Talentoso</button>
+              <button className="btn-primary-action" onClick={() => handleSeleccionarNivel('maestro')}>Maestro</button>
             </div>
           </div>
-
-          <div className="config-section">
-            <label>Tiempo Límite:</label>
-            <div className="difficulty-pill-group">
-              <button className={`diff-btn ${limiteTiempo === 180 ? 'active' : ''}`} onClick={() => setLimiteTiempo(180)}>3 Minutos</button>
-              <button className={`diff-btn ${limiteTiempo === 300 ? 'active' : ''}`} onClick={() => setLimiteTiempo(300)}>5 Minutos</button>
-            </div>
-          </div>
-
-          <div className="config-section">
-            <label>Imagen Inicial:</label>
-            <div className="image-selector-tabs" style={{flexWrap: 'wrap'}}>
-              {IMAGENES_PRESET.map((img) => (
-                <button
-                  key={img.id}
-                  className={`img-tab-btn ${imagenActual.id === img.id ? 'active' : ''}`}
-                  onClick={() => setImagenActual(img)}
-                >
-                  {img.nombre}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div className="victory-btn-group" style={{ marginTop: '20px' }}>
-            <button className="btn-primary-action" onClick={() => iniciarJuego(gridSize)}>¡Jugar!</button>
-            <button className="btn-secondary-action" onClick={onVolver}>Volver al Menú</button>
+              <button className="btn-secondary-action" onClick={onVolver}>Volver al Menú</button>
           </div>
         </div>
+
+        {/* Contenedor 2: Vista Previa y Selección con Botones */}
+        <div className="config-box clean-modal-box config-box-item">
+          <h2 style={{ marginBottom: '16px', textAlign: 'center' }}>Selección de Rompecabezas</h2>
+          
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <button 
+              className="btn-secondary-action" 
+              style={{ padding: '4px 8px', fontSize: '1rem', minWidth: '35px' }}
+              onClick={() => {
+                const idx = IMAGENES_PRESET.findIndex(i => i.id === imagenActual.id);
+                const prev = idx > 0 ? idx - 1 : IMAGENES_PRESET.length - 1;
+                setImagenActual(IMAGENES_PRESET[prev]);
+              }}
+            >
+              ◀
+            </button>
+            <h3 style={{ fontSize: '1.1rem', margin: '0 10px', textAlign: 'center', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {imagenActual.nombre}
+            </h3>
+            <button 
+              className="btn-secondary-action" 
+              style={{ padding: '4px 8px', fontSize: '1rem', minWidth: '35px' }}
+              onClick={() => {
+                const idx = IMAGENES_PRESET.findIndex(i => i.id === imagenActual.id);
+                const next = idx < IMAGENES_PRESET.length - 1 ? idx + 1 : 0;
+                setImagenActual(IMAGENES_PRESET[next]);
+              }}
+            >
+              ▶
+            </button>
+          </div>
+
+          <div style={{ flex: 1, borderRadius: '12px', overflow: 'hidden', border: '2px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', padding: '10px' }}>
+            <img 
+              src={imagenActual.url} 
+              alt={imagenActual.nombre} 
+              style={{ width: '100%', height: '100%', maxHeight: '160px', objectFit: 'contain', display: 'block' }} 
+            />
+          </div>
+        </div>
+
       </div>
     );
   }
 
   return (
     <div className="rompecabezas-wrapper">
+      
       <div className="game-layout">
-        <div className="board-container-card">
+        <div className="board-container-card" style={{ position: 'relative' }}>
+          
           <div className="metrics-strip">
+            <div 
+              className="metric-chip config-chip" 
+              onClick={() => setMostrarGuia(true)} 
+              style={{ cursor: 'pointer', order: 98 }}
+              title="Ver Imagen Guía"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-main)' }}>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+            <div 
+              className="metric-chip config-chip" 
+              onClick={() => { setPantalla('config'); setEnJuego(false); }} 
+              style={{ cursor: 'pointer', order: 99 }}
+              title="Volver a Configuración"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-main)' }}>
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+
             <div className="metric-chip">
               <span className="metric-label">Movimientos</span>
               <span className="metric-val">{movimientos}</span>
             </div>
+            
             <div className="metric-chip">
               <span className="metric-label">{limiteTiempo > 0 ? 'Tiempo Restante' : 'Tiempo'}</span>
               <span className={`metric-val ${limiteTiempo > 0 && tiempoSegundos <= 10 ? 'time-warning' : ''}`}>
                 {formatoTiempo(tiempoSegundos)}
               </span>
             </div>
-            <button className="btn-secondary-action reset-btn" onClick={() => setPantalla('config')}>Configurar</button>
           </div>
 
-          <div 
-            className="puzzle-grid-frame"
-            style={{
-              width: `${gridSize * tileSize + (gridSize - 1) * 4}px`,
-              gridTemplateColumns: `repeat(${gridSize}, ${tileSize}px)`,
-              gridTemplateRows: `repeat(${gridSize}, ${tileSize}px)`
-            }}
-          >
-            {piezas.map((pieza, index) => {
-              const fila = Math.floor(pieza.originalIndex / gridSize);
-              const col = pieza.originalIndex % gridSize;
-              const posX = (col / (gridSize - 1)) * 100;
-              const posY = (fila / (gridSize - 1)) * 100;
+          {/* Wrapper que permite la flexibilidad y el ratio 1:1 dinámico */}
+          <div className="puzzle-grid-wrapper">
+            <div 
+              className="puzzle-grid-frame"
+              style={{
+                gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
+                gridTemplateRows: `repeat(${gridSize}, 1fr)`
+              }}
+            >
+              {piezas.map((pieza, index) => {
+                const fila = Math.floor(pieza.originalIndex / gridSize);
+                const col = pieza.originalIndex % gridSize;
+                const posX = (col / (gridSize - 1)) * 100;
+                const posY = (fila / (gridSize - 1)) * 100;
 
-              const estaSeleccionada = indiceSeleccionado === index;
-              const esArrastrado = indiceArrastrado === index;
-              const esSobrevolado = indiceSobrevolado === index;
-              const enPosicion = pieza.originalIndex === index;
+                const estaSeleccionada = indiceSeleccionado === index;
+                const esArrastrado = indiceArrastrado === index;
+                const esSobrevolado = indiceSobrevolado === index;
+                const enPosicion = pieza.originalIndex === index;
 
-              return (
-                <div
-                  key={pieza.id}
-                  className={`puzzle-piece ${estaSeleccionada ? 'selected' : ''} ${esArrastrado ? 'dragging' : ''} ${esSobrevolado ? 'drag-over' : ''} ${enPosicion ? 'correct-pos' : ''}`}
-                  draggable={!haGanado && !haPerdidoTiempo}
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={handleDragOver}
-                  onDragEnter={() => handleDragEnter(index)}
-                  onDragLeave={handleDragLeave}
-                  onDrop={(e) => handleDrop(e, index)}
-                  onDragEnd={handleDragEnd}
-                  onClick={() => handlePiezaClick(index)}
-                  style={{
-                    width: `${tileSize}px`,
-                    height: `${tileSize}px`,
-                    backgroundImage: `url(${imagenActual.url})`,
-                    backgroundSize: `${gridSize * 100}% ${gridSize * 100}%`,
-                    backgroundPosition: `${posX}% ${posY}%`
-                  }}
-                >
-                  {estaSeleccionada && (
-                    <div className="selection-ring"></div>
-                  )}
-                </div>
-              );
-            })}
+                return (
+                  <div
+                    key={pieza.id}
+                    className={`puzzle-piece ${estaSeleccionada ? 'selected' : ''} ${esArrastrado ? 'dragging' : ''} ${esSobrevolado ? 'drag-over' : ''} ${enPosicion ? 'correct-pos' : ''}`}
+                    draggable={!haGanado && !haPerdidoTiempo}
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragOver={handleDragOver}
+                    onDragEnter={() => handleDragEnter(index)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, index)}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => handlePiezaClick(index)}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      backgroundImage: `url(${imagenActual.url})`,
+                      backgroundSize: `${gridSize * 100}% ${gridSize * 100}%`,
+                      backgroundPosition: `${posX}% ${posY}%`
+                    }}
+                  >
+                    {estaSeleccionada && (
+                      <div className="selection-ring"></div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
           <p className="mouse-hint">Arrastra una pieza sobre otra o haz clic en dos para intercambiarlas.</p>
         </div>
-
-        <div className="side-panel">
-          <div className="side-card preview-card">
-            <div className="side-card-header">
-              <h3>Vista Previa</h3>
-              <button className="btn-text-action" onClick={() => setMostrarModalImagen(true)}>Ampliar</button>
-            </div>
-            <div className="preview-img-container" onClick={() => setMostrarModalImagen(true)}>
-              <img src={imagenActual.url} alt={imagenActual.nombre} />
-            </div>
-
-            <h3 className="list-title">Seleccionar Rompecabezas</h3>
-            <div className="image-selector-list">
-              {IMAGENES_PRESET.map((img) => (
-                <button
-                  key={img.id}
-                  className={`img-list-item ${imagenActual.id === img.id ? 'active' : ''}`}
-                  onClick={() => {
-                    setImagenActual(img);
-                    if (enJuego) iniciarJuego(gridSize);
-                  }}
-                >
-                  <img src={img.url} alt={img.nombre} className="img-list-thumb" />
-                  <span className="img-list-name">{img.nombre}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
-
-      {mostrarModalImagen && (
-        <div className="clean-modal-backdrop" onClick={() => setMostrarModalImagen(false)}>
-          <div className="clean-modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="clean-modal-header">
-              <h3>{imagenActual.nombre}</h3>
-              <button className="btn-close-modal" onClick={() => setMostrarModalImagen(false)}>✕</button>
-            </div>
-            <img src={imagenActual.url} alt={imagenActual.nombre} className="modal-full-img" />
-          </div>
-        </div>
-      )}
 
       {haGanado && (
         <div className="clean-modal-backdrop victory-backdrop">
           <div className="clean-modal-box victory-box">
             <div className="victory-icon-bubble">¡OK!</div>
-            <h2>¡Rompecabezas Completado!</h2>
-            <p>Has resuelto con éxito la imagen en dificultad <strong>{dificultad.toUpperCase()}</strong>.</p>
+            <h2 style={{ textAlign: "center", color: "var(--rosa-hover)", margin: "10px 0" }}>{getPremio(dificultad) === '' ? '¡Ganaste!' : `¡Ganaste ${getPremio(dificultad)}!`}</h2>
             <div className="victory-solved-thumb">
               <img src={imagenActual.url} alt="Completado" />
             </div>
@@ -352,8 +380,7 @@ export default function Rompecabezas({ onVolver }: RompecabezasProps) {
               </div>
             </div>
             <div className="victory-btn-group">
-              <button className="btn-primary-action" onClick={() => iniciarJuego(gridSize)}>Jugar de Nuevo</button>
-              <button className="btn-secondary-action" onClick={() => setPantalla('config')}>Volver a Configurar</button>
+              <button className="btn-primary-action" onClick={onVolver}>Volver al Menú</button>
             </div>
           </div>
         </div>
@@ -361,15 +388,21 @@ export default function Rompecabezas({ onVolver }: RompecabezasProps) {
 
       {haPerdidoTiempo && (
         <div className="clean-modal-backdrop victory-backdrop">
-          <div className="clean-modal-box victory-box" style={{ borderColor: '#ef4444' }}>
-            <div className="victory-icon-bubble" style={{ backgroundColor: '#ef4444', color: '#fff' }}>!</div>
-            <h2>¡Se acabó el tiempo!</h2>
-            <p>No pudiste completar el rompecabezas a tiempo.</p>
-            <div className="victory-btn-group">
-              <button className="btn-primary-action" onClick={() => iniciarJuego(gridSize)}>Reintentar</button>
-              <button className="btn-secondary-action" onClick={() => setPantalla('config')}>Volver a Configurar</button>
+            <div className="clean-modal-box victory-box" style={{ borderColor: '#ef4444' }}>
+              <div className="victory-icon-bubble" style={{ backgroundColor: '#ef4444', color: '#fff' }}>X</div>
+              <h2 style={{ textAlign: "center", margin: "15px 0 25px" }}>¡Perdiste!</h2>
+              <div className="victory-btn-group">
+                <button className="btn-primary-action" onClick={onVolver}>Volver al Menú</button>
+              </div>
             </div>
           </div>
+      )}
+    
+      {mostrarGuia && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px' }} onClick={() => setMostrarGuia(false)}>
+          <span style={{ position: 'absolute', top: '20px', right: '30px', color: '#fff', fontSize: '2rem', cursor: 'pointer', fontWeight: 'bold' }}>&times;</span>
+          <img src={imagenActual.url} alt="Guía" style={{ maxWidth: '100%', maxHeight: '85vh', objectFit: 'contain', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.6)' }} />
+          <p style={{ color: '#fff', marginTop: '16px', fontSize: '1.2rem', fontWeight: 600 }}>Toca para cerrar</p>
         </div>
       )}
     </div>

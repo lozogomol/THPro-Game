@@ -3,35 +3,49 @@ import './Memorama.css';
 import { soundManager } from '../../utils/audio';
 import cartaImg from '../../assets/Carta.png';
 
-export type DificultadMemorama = 'facil' | 'medio' | 'dificil';
-export type TiempoLimite = 180 | 300;
+import imgM1 from '../../assets/M-1.png';
+import imgM2 from '../../assets/M-2.png';
+import imgM3 from '../../assets/M-3.png';
+import imgM4 from '../../assets/M-4.png';
+import imgM5 from '../../assets/M-5.png';
+import imgM6 from '../../assets/M-6.png';
+import imgM7 from '../../assets/M-7.png';
+import imgLogo from '../../assets/Logo.png';
+
+export type DificultadMemorama = 'aprendiz' | 'talentoso' | 'maestro';
 
 interface Carta {
   id: number;
-  simbolo: string;
+  imgUrl: string;
   nombre: string;
   volteada: boolean;
   emparejada: boolean;
 }
 
-const ICONOS_DISPONIBLES = [
-  { simbolo: '✨', nombre: 'Destello' },
-  { simbolo: '🚀', nombre: 'Cohete' },
-  { simbolo: '🎨', nombre: 'Paleta' },
-  { simbolo: '🌈', nombre: 'Arcoíris' },
-  { simbolo: '💎', nombre: 'Diamante' },
-  { simbolo: '🦄', nombre: 'Unicornio' },
-  { simbolo: '🎈', nombre: 'Globo' },
-  { simbolo: '🍕', nombre: 'Pizza' },
+const IMAGENES_DISPONIBLES = [
+  { imgUrl: imgM1, nombre: 'M-1' },
+  { imgUrl: imgM2, nombre: 'M-2' },
+  { imgUrl: imgM3, nombre: 'M-3' },
+  { imgUrl: imgM4, nombre: 'M-4' },
+  { imgUrl: imgM5, nombre: 'M-5' },
+  { imgUrl: imgM6, nombre: 'M-6' },
+  { imgUrl: imgM7, nombre: 'M-7' },
+  { imgUrl: imgLogo, nombre: 'Logo' },
 ];
 
+const CONFIGURACION_MEMORAMA = {
+  aprendiz: { pares: 4, tiempo: 60 },
+  talentoso: { pares: 6, tiempo: 40 },
+  maestro: { pares: 8, tiempo: 40 }
+};
+
 const generarCartas = (parejasCount: number): Carta[] => {
-  const seleccion = ICONOS_DISPONIBLES.slice(0, parejasCount);
+  const seleccion = IMAGENES_DISPONIBLES.slice(0, parejasCount);
   const cartasDuplicadas: Carta[] = [];
 
   seleccion.forEach((item, index) => {
-    cartasDuplicadas.push({ id: index * 2, simbolo: item.simbolo, nombre: item.nombre, volteada: false, emparejada: false });
-    cartasDuplicadas.push({ id: index * 2 + 1, simbolo: item.simbolo, nombre: item.nombre, volteada: false, emparejada: false });
+    cartasDuplicadas.push({ id: index * 2, imgUrl: item.imgUrl, nombre: item.nombre, volteada: false, emparejada: false });
+    cartasDuplicadas.push({ id: index * 2 + 1, imgUrl: item.imgUrl, nombre: item.nombre, volteada: false, emparejada: false });
   });
 
   return cartasDuplicadas.sort(() => Math.random() - 0.5);
@@ -39,46 +53,55 @@ const generarCartas = (parejasCount: number): Carta[] => {
 
 interface MemoramaProps {
   onVolver: () => void;
+  onResultado: (victoria: boolean, premio: string) => void;
 }
 
-export default function Memorama({ onVolver }: MemoramaProps) {
-  const [pantalla, setPantalla] = useState<'config' | 'juego'>('juego');
-  const [dificultad, setDificultad] = useState<DificultadMemorama>('dificil');
-  const [limiteTiempo, setLimiteTiempo] = useState<TiempoLimite>(300);
-
-  const numParejas = dificultad === 'facil' ? 4 : dificultad === 'medio' ? 6 : 8;
+export default function Memorama({ onVolver, onResultado }: MemoramaProps) {
+  const [pantalla, setPantalla] = useState<'config' | 'juego'>('config');
+  const [dificultad, setDificultad] = useState<DificultadMemorama>('talentoso');
+  const [limiteTiempo, setLimiteTiempo] = useState<number>(120);
 
   const [cartas, setCartas] = useState<Carta[]>([]);
   const [cartasVolteadas, setCartasVolteadas] = useState<number[]>([]);
-  const [bloquearTablero, setBloquearTablero] = useState<boolean>(false);
+  const [cartasEncontradas, setCartasEncontradas] = useState<number[]>([]);
 
   const [movimientos, setMovimientos] = useState<number>(0);
-  const [parejasEncontradas, setParejasEncontradas] = useState<number>(0);
   const [tiempoSegundos, setTiempoSegundos] = useState<number>(0);
+
   const [enJuego, setEnJuego] = useState<boolean>(false);
   const [haGanado, setHaGanado] = useState<boolean>(false);
   const [haPerdido, setHaPerdido] = useState<boolean>(false);
+  const [bloqueo, setBloqueo] = useState<boolean>(false);
 
   const timerRef = useRef<number | null>(null);
 
-  // Use an effect to auto-start on load because it starts in 'juego' mode
+  const getPremio = (dif: string) => {
+    if (dif === 'facil' || dif === 'aprendiz') return '';
+    if (dif === 'medio' || dif === 'talentoso') return 'Un Premio';
+    if (dif === 'dificil' || dif === 'maestro') return 'Masaje Exprés';
+    return '';
+  };
+
   useEffect(() => {
     if (pantalla === 'juego' && !enJuego && cartas.length === 0) {
-      iniciarJuego();
+      iniciarJuego(dificultad);
     }
   }, [pantalla]);
 
-  const iniciarJuego = () => {
+  const iniciarJuego = (nivel: DificultadMemorama = dificultad) => {
     soundManager.playClick();
-    setCartas(generarCartas(numParejas));
+    const config = CONFIGURACION_MEMORAMA[nivel];
+    const mazoMezclado = generarCartas(config.pares);
+
+    setCartas(mazoMezclado);
     setCartasVolteadas([]);
-    setBloquearTablero(false);
+    setCartasEncontradas([]);
     setMovimientos(0);
-    setParejasEncontradas(0);
-    setTiempoSegundos(limiteTiempo > 0 ? limiteTiempo : 0);
+    setTiempoSegundos(config.tiempo > 0 ? config.tiempo : 0);
     setHaGanado(false);
     setHaPerdido(false);
     setEnJuego(true);
+    setBloqueo(false);
     setPantalla('juego');
   };
 
@@ -90,6 +113,7 @@ export default function Memorama({ onVolver }: MemoramaProps) {
             if (prev <= 1) {
               setHaPerdido(true);
               setEnJuego(false);
+              onResultado(false, '');
               if (timerRef.current) clearInterval(timerRef.current);
               return 0;
             }
@@ -102,7 +126,7 @@ export default function Memorama({ onVolver }: MemoramaProps) {
       if (timerRef.current) clearInterval(timerRef.current);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [enJuego, haGanado, haPerdido, limiteTiempo]);
+  }, [enJuego, haGanado, haPerdido, limiteTiempo, onResultado]);
 
   const formatoTiempo = (segundos: number): string => {
     const mins = Math.floor(segundos / 60);
@@ -110,77 +134,68 @@ export default function Memorama({ onVolver }: MemoramaProps) {
     return `${mins.toString().padStart(2, '0')}:${segs.toString().padStart(2, '0')}`;
   };
 
-  const handleCartaClick = (id: number) => {
-    if (bloquearTablero || haGanado || haPerdido) return;
-
-    const carta = cartas.find((c) => c.id === id);
-    if (!carta || carta.volteada || carta.emparejada) return;
+  const manejarClickCarta = (index: number) => {
+    if (!enJuego || bloqueo || haGanado || haPerdido) return;
+    if (cartasVolteadas.includes(index) || cartasEncontradas.includes(index)) return;
 
     soundManager.playClick();
-    const nuevasCartas = cartas.map((c) => (c.id === id ? { ...c, volteada: true } : c));
-    setCartas(nuevasCartas);
-    const nuevoArrayVolteadas = [...cartasVolteadas, id];
-    setCartasVolteadas(nuevoArrayVolteadas);
+    const nuevasVolteadas = [...cartasVolteadas, index];
+    setCartasVolteadas(nuevasVolteadas);
 
-    if (nuevoArrayVolteadas.length === 2) {
-      setBloquearTablero(true);
-      setMovimientos((prev) => prev + 1);
+    if (nuevasVolteadas.length === 2) {
+      setBloqueo(true);
+      setMovimientos((m) => m + 1);
 
-      const [id1, id2] = nuevoArrayVolteadas;
-      const carta1 = cartas.find((c) => c.id === id1);
-      const carta2 = cartas.find((c) => c.id === id2);
+      const carta1 = cartas[nuevasVolteadas[0]];
+      const carta2 = cartas[nuevasVolteadas[1]];
 
-      if (carta1 && carta2 && carta1.simbolo === carta2.simbolo) {
-        soundManager.playSwap();
+      if (carta1.imgUrl === carta2.imgUrl) {
+        soundManager.playMatch();
         setTimeout(() => {
-          setCartas((prev) => prev.map((c) => (c.id === id1 || c.id === id2 ? { ...c, emparejada: true } : c)));
+          const nuevasEncontradas = [...cartasEncontradas, nuevasVolteadas[0], nuevasVolteadas[1]];
+          setCartasEncontradas(nuevasEncontradas);
           setCartasVolteadas([]);
-          setBloquearTablero(false);
-          const nuevasParejas = parejasEncontradas + 1;
-          setParejasEncontradas(nuevasParejas);
-          if (nuevasParejas === numParejas) {
+          setBloqueo(false);
+
+          if (nuevasEncontradas.length === cartas.length) {
             setHaGanado(true);
             setEnJuego(false);
+            onResultado(true, getPremio(dificultad));
             soundManager.playVictory();
           }
-        }, 500);
+        }, 600);
       } else {
+        soundManager.playError();
         setTimeout(() => {
-          setCartas((prev) => prev.map((c) => (c.id === id1 || c.id === id2 ? { ...c, volteada: false } : c)));
           setCartasVolteadas([]);
-          setBloquearTablero(false);
-        }, 900);
+          setBloqueo(false);
+        }, 1000);
       }
     }
   };
 
+  const handleSeleccionarNivel = (nivel: DificultadMemorama) => {
+    const config = CONFIGURACION_MEMORAMA[nivel];
+    setDificultad(nivel);
+    setLimiteTiempo(config.tiempo);
+    iniciarJuego(nivel);
+  };
+
   if (pantalla === 'config') {
     return (
-      <div className="memorama-wrapper config-screen">
+      <div className="memorama-wrapper config-screen" style={{ padding: '5mm' }}>
         <div className="config-box clean-modal-box">
-          <h2>Configuración del Memorama</h2>
-          
+          <h2 style={{ textAlign: 'center' }}>Nivel de Memorama<br />THPro S.R.L.</h2>
           <div className="config-section">
-            <label>Dificultad:</label>
-            <div className="difficulty-pill-group">
-              <button className={`diff-btn ${dificultad === 'facil' ? 'active' : ''}`} onClick={() => setDificultad('facil')}>Fácil (8)</button>
-              <button className={`diff-btn ${dificultad === 'medio' ? 'active' : ''}`} onClick={() => setDificultad('medio')}>Medio (12)</button>
-              <button className={`diff-btn ${dificultad === 'dificil' ? 'active' : ''}`} onClick={() => setDificultad('dificil')}>Difícil (16)</button>
+            <div className="difficulty-pill-group" style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+              <button className="btn-primary-action" onClick={() => handleSeleccionarNivel('aprendiz')}>Aprendiz</button>
+              <button className="btn-primary-action" onClick={() => handleSeleccionarNivel('talentoso')}>Talentoso</button>
+              <button className="btn-primary-action" onClick={() => handleSeleccionarNivel('maestro')}>Maestro</button>
             </div>
           </div>
-
-          <div className="config-section">
-            <label>Tiempo Límite:</label>
-            <div className="difficulty-pill-group">
-              <button className={`diff-btn ${limiteTiempo === 180 ? 'active' : ''}`} onClick={() => setLimiteTiempo(180)}>3 Minutos</button>
-              <button className={`diff-btn ${limiteTiempo === 300 ? 'active' : ''}`} onClick={() => setLimiteTiempo(300)}>5 Minutos</button>
+          <div className="victory-btn-group" style={{ marginTop: '20px' }}>
+              <button className="btn-secondary-action" onClick={onVolver}>Volver al Menú</button>
             </div>
-          </div>
-
-          <div className="victory-btn-group" style={{ marginTop: '30px' }}>
-            <button className="btn-primary-action" onClick={iniciarJuego}>¡Jugar!</button>
-            <button className="btn-secondary-action" onClick={onVolver}>Volver al Menú</button>
-          </div>
         </div>
       </div>
     );
@@ -188,13 +203,28 @@ export default function Memorama({ onVolver }: MemoramaProps) {
 
   return (
     <div className="memorama-wrapper">
+      
       <div className="memorama-content">
-        <div className="memorama-board-card">
-          <div className="metrics-strip">
-            <div className="metric-chip">
-              <span className="metric-label">Parejas</span>
-              <span className="metric-val">{parejasEncontradas} / {numParejas}</span>
+        <div className="memorama-board-card" style={{ position: 'relative' }}>
+  
+
+          
+      <div className="metrics-strip">
+
+            <div 
+              className="metric-chip config-chip" 
+              onClick={() => { setPantalla('config'); setEnJuego(false); }} 
+              style={{ cursor: 'pointer', order: 99 }}
+              title="Volver a Configuración"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-main)' }}>
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
             </div>
+
+            
+
             <div className="metric-chip">
               <span className="metric-label">Movimientos</span>
               <span className="metric-val">{movimientos}</span>
@@ -205,26 +235,41 @@ export default function Memorama({ onVolver }: MemoramaProps) {
                 {formatoTiempo(tiempoSegundos)}
               </span>
             </div>
-            <button className="btn-secondary-action reset-btn" onClick={() => setPantalla('config')}>Configurar</button>
+            
           </div>
-
           <div className={`cartas-grid grid-${dificultad}`}>
-            {cartas.map((carta) => {
-              const estaDescubierta = carta.volteada || carta.emparejada;
+            {cartas.map((carta, index) => {
+              const estaVolteada = cartasVolteadas.includes(index);
+              const estaEncontrada = cartasEncontradas.includes(index);
               return (
-                <div key={carta.id} className={`memorama-card ${estaDescubierta ? 'flipped' : ''} ${carta.emparejada ? 'matched' : ''}`} onClick={() => handleCartaClick(carta.id)}>
+                <div 
+                  key={carta.id} 
+                  className={`memorama-card ${estaVolteada ? 'flipped' : ''} ${estaEncontrada ? 'matched' : ''}`}
+                  onClick={() => manejarClickCarta(index)}
+                >
                   <div className="card-inner">
-                    <div className="card-back" style={{ backgroundImage: `url(${cartaImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      
+
+                    <div className="card-back" style={{ padding: 0 }}>
+                      <img src={cartaImg} alt="Carta" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
                     </div>
-                    <div className="card-front">
-                      <span className="card-symbol">{carta.simbolo}</span>
+                    <div className="card-front" style={{ padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img 
+                        src={carta.imgUrl} 
+                        alt={carta.nombre} 
+                        style={{ 
+                          width: ['M-1', 'M-2', 'M-3'].includes(carta.nombre) ? '80%' : '100%', 
+                          height: ['M-1', 'M-2', 'M-3'].includes(carta.nombre) ? '80%' : '100%', 
+                          objectFit: 'contain' 
+                        }} 
+                        draggable={false} 
+                      />
                     </div>
                   </div>
                 </div>
               );
             })}
           </div>
-          <p className="mouse-hint">Haz clic sobre dos cartas para encontrar las parejas idénticas.</p>
         </div>
       </div>
 
@@ -232,21 +277,19 @@ export default function Memorama({ onVolver }: MemoramaProps) {
         <div className="clean-modal-backdrop victory-backdrop">
           <div className="clean-modal-box victory-box">
             <div className="victory-icon-bubble">¡OK!</div>
-            <h2>¡Excelente Memoria!</h2>
-            <p>Has completado el juego en dificultad <strong>{dificultad.toUpperCase()}</strong>.</p>
+            <h2 style={{ textAlign: "center", color: "var(--rosa-hover)", margin: "10px 0" }}>{getPremio(dificultad) === '' ? '¡Ganaste!' : `¡Ganaste ${getPremio(dificultad)}!`}</h2>
             <div className="victory-summary-stats">
               <div className="summary-col">
                 <span className="sum-label">Movimientos</span>
                 <span className="sum-value">{movimientos}</span>
               </div>
               <div className="summary-col">
-                <span className="sum-label">Tiempo Total</span>
+                <span className="sum-label">Tiempo</span>
                 <span className="sum-value">{limiteTiempo > 0 ? formatoTiempo(limiteTiempo - tiempoSegundos) : formatoTiempo(tiempoSegundos)}</span>
               </div>
             </div>
             <div className="victory-btn-group">
-              <button className="btn-primary-action" onClick={iniciarJuego}>Jugar de Nuevo</button>
-              <button className="btn-secondary-action" onClick={() => setPantalla('config')}>Volver a Configurar</button>
+              <button className="btn-primary-action" onClick={onVolver}>Volver al Menú</button>
             </div>
           </div>
         </div>
@@ -254,16 +297,14 @@ export default function Memorama({ onVolver }: MemoramaProps) {
 
       {haPerdido && (
         <div className="clean-modal-backdrop victory-backdrop">
-          <div className="clean-modal-box victory-box" style={{ borderColor: '#ef4444' }}>
-            <div className="victory-icon-bubble" style={{ backgroundColor: '#ef4444', color: '#fff' }}>!</div>
-            <h2>¡Se acabó el tiempo!</h2>
-            <p>No lograste encontrar todas las parejas a tiempo.</p>
-            <div className="victory-btn-group">
-              <button className="btn-primary-action" onClick={iniciarJuego}>Reintentar</button>
-              <button className="btn-secondary-action" onClick={() => setPantalla('config')}>Volver a Configurar</button>
+            <div className="clean-modal-box victory-box" style={{ borderColor: '#ef4444' }}>
+              <div className="victory-icon-bubble" style={{ backgroundColor: '#ef4444', color: '#fff' }}>X</div>
+              <h2 style={{ textAlign: "center", margin: "15px 0 25px" }}>¡Perdiste!</h2>
+              <div className="victory-btn-group">
+                <button className="btn-primary-action" onClick={onVolver}>Volver al Menú</button>
+              </div>
             </div>
           </div>
-        </div>
       )}
     </div>
   );
