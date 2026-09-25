@@ -196,7 +196,7 @@ export default function Rompecabezas({ onVolver, onResultado }: RompecabezasProp
     let newTime = limiteTiempo;
     if (nivel === 'aprendiz') { setDificultad('facil'); setGridSize(3); newGridSize = 3; setLimiteTiempo(60); newTime = 60; }
     if (nivel === 'talentoso') { setDificultad('medio'); setGridSize(4); newGridSize = 4; setLimiteTiempo(60); newTime = 60; }
-    if (nivel === 'maestro') { setDificultad('dificil'); setGridSize(5); newGridSize = 5; setLimiteTiempo(80); newTime = 80; }
+    if (nivel === 'maestro') { setDificultad('dificil'); setGridSize(5); newGridSize = 5; setLimiteTiempo(95); newTime = 95; }
     setPantalla('juego');
     iniciarJuego(newGridSize, newTime);
   };
@@ -256,7 +256,7 @@ export default function Rompecabezas({ onVolver, onResultado }: RompecabezasProp
             <img 
               src={imagenActual.url} 
               alt={imagenActual.nombre} 
-              style={{ width: '100%', height: '100%', maxHeight: '160px', objectFit: 'contain', display: 'block' }} 
+              style={{ width: '100%', height: '100%', maxHeight: '100%', objectFit: 'contain', display: 'block' }} 
             />
           </div>
         </div>
@@ -358,6 +358,11 @@ export default function Rompecabezas({ onVolver, onResultado }: RompecabezasProp
             </div>
           </div>
           <p className="mouse-hint">Arrastra una pieza sobre otra o haz clic en dos para intercambiarlas.</p>
+        </div>
+        
+        <div className="preview-side-container" onClick={() => setMostrarGuia(true)}>
+          <img src={imagenActual.url} alt="Guía miniatura" className="preview-side-img" />
+          <span className="preview-side-text">Ver Guía</span>
         </div>
       </div>
 

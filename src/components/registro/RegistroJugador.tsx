@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 interface RegistroProps {
-  onSubmit: (datos: { nombre: string; apellido: string; telefono: string }) => void;
+  onSubmit: (datos: { nombre: string; telefono: string }) => void;
   onCancelar: () => void;
 }
 
@@ -15,29 +15,23 @@ const esNombreCoherente = (texto: string) => {
 
 export default function RegistroJugador({ onSubmit, onCancelar }: RegistroProps) {
   const [nombre, setNombre] = useState('');
-  const [apellido, setApellido] = useState('');
   const [telefono, setTelefono] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!esNombreCoherente(nombre)) {
-      alert('Por favor, ingresa un nombre válido y real.');
-      return;
-    }
-    
-    if (!esNombreCoherente(apellido)) {
-      alert('Por favor, ingresa un apellido válido y real.');
+      alert('Por favor, ingresa un nombre completo válido y real.');
       return;
     }
 
     if (telefono.length !== 8) {
-      alert('El número de teléfono debe tener exactamente 8 dígitos.');
+      alert('El número de celular debe tener exactamente 8 dígitos.');
       return;
     }
 
-    if (nombre && apellido && telefono.length === 8) {
-      onSubmit({ nombre, apellido, telefono });
+    if (nombre && telefono.length === 8) {
+      onSubmit({ nombre, telefono });
     }
   };
 
@@ -50,15 +44,11 @@ export default function RegistroJugador({ onSubmit, onCancelar }: RegistroProps)
         </div>
         <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Nombre:</label>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Nombre Completo:</label>
             <input required type="text" value={nombre} onChange={e => setNombre(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-light)', outline: 'none', boxSizing: 'border-box' }} />
           </div>
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Apellido:</label>
-            <input required type="text" value={apellido} onChange={e => setApellido(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-light)', outline: 'none', boxSizing: 'border-box' }} />
-          </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Teléfono:</label>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Celular:</label>
             <input 
               required 
               type="tel" 

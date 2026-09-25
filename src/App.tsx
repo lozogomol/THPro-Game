@@ -30,7 +30,7 @@ export default function App() {
     }
   };
 
-  const guardarYJugar = (datos: { nombre: string; apellido: string; telefono: string }) => {
+  const guardarYJugar = (datos: { nombre: string; telefono: string }) => {
     if (juegoPendiente) {
       const newId = crypto.randomUUID();
       const nuevoRegistro = {

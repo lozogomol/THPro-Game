@@ -48,7 +48,7 @@
 /* Modo Horizontal (Landscape) - Uno al lado del otro */
 @media (orientation: landscape) {
   .config-screen-layout {
-    flex-direction: row;
+    flex-direction: row; align-items: stretch;
   }
 }
 
@@ -235,7 +235,7 @@
 
 .puzzle-cover-img {
   width: 100%;
-  height: 100%;
+  
   object-fit: contain;
   padding: 10px;
   box-sizing: border-box;
@@ -404,7 +404,7 @@
 
 .preview-img-container img {
   width: 100%;
-  height: 100%;
+  
   object-fit: cover;
   transition: transform 0.25s ease;
 }
@@ -616,7 +616,7 @@
 
 .victory-solved-thumb img {
   width: 100%;
-  height: 100%;
+  
   object-fit: cover;
 }
 
@@ -679,5 +679,57 @@
   
   .config-box-item {
     padding: 16px;
+  }
+}
+
+/* =========================================
+   8. VISTA PREVIA LATERAL/INFERIOR
+   ========================================= */
+
+.preview-side-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+.preview-side-container:hover {
+  border-color: var(--celeste-border);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.preview-side-img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.preview-side-text {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+@media (orientation: landscape) {
+  .game-layout {
+    flex-direction: row; align-items: stretch;
+  }
+  .preview-side-container {
+    
+    width: 130px;
+  }
+  .preview-side-img {
+    width: 100%;
+    height: 100px;
+    flex: 1;
   }
 }

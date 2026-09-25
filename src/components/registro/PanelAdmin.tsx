@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 export interface JugadorRecord {
   id: string;
   nombre: string;
-  apellido: string;
+  apellido?: string;
   telefono: string;
   juego: string;
   fecha: string;
@@ -45,9 +45,8 @@ export default function PanelAdmin({ onCerrar }: PanelAdminProps) {
         <table>
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Apellido</th>
-              <th>Teléfono</th>
+              <th>Nombre Completo</th>
+              <th>Celular</th>
               <th>Juego</th>
               <th>Resultado</th>
               <th>Premio</th>
@@ -57,8 +56,7 @@ export default function PanelAdmin({ onCerrar }: PanelAdminProps) {
           <tbody>
             ${jugadores.map(j => `
               <tr>
-                <td>${j.nombre}</td>
-                <td>${j.apellido}</td>
+                <td>${j.nombre}${j.apellido ? ' ' + j.apellido : ''}</td>
                 <td>${j.telefono}</td>
                 <td>${j.juego}</td>
                 <td>${j.resultado || '-'}</td>
@@ -104,9 +102,8 @@ export default function PanelAdmin({ onCerrar }: PanelAdminProps) {
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
                 <thead>
                   <tr style={{ background: '#f1f5f9', textAlign: 'left' }}>
-                    <th style={{ padding: '12px', borderBottom: '2px solid var(--border-light)', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.8rem' }}>Nombre</th>
-                    <th style={{ padding: '12px', borderBottom: '2px solid var(--border-light)', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.8rem' }}>Apellido</th>
-                    <th style={{ padding: '12px', borderBottom: '2px solid var(--border-light)', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.8rem' }}>Teléfono</th>
+                    <th style={{ padding: '12px', borderBottom: '2px solid var(--border-light)', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.8rem' }}>Nombre Completo</th>
+                    <th style={{ padding: '12px', borderBottom: '2px solid var(--border-light)', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.8rem' }}>Celular</th>
                     <th style={{ padding: '12px', borderBottom: '2px solid var(--border-light)', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.8rem' }}>Juego</th>
                     <th style={{ padding: '12px', borderBottom: '2px solid var(--border-light)', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.8rem' }}>Resultado</th>
                     <th style={{ padding: '12px', borderBottom: '2px solid var(--border-light)', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.8rem' }}>Premio</th>
@@ -116,8 +113,7 @@ export default function PanelAdmin({ onCerrar }: PanelAdminProps) {
                 <tbody>
                   {jugadores.map(j => (
                     <tr key={j.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                      <td style={{ padding: '12px', fontSize: '0.9rem' }}>{j.nombre}</td>
-                      <td style={{ padding: '12px', fontSize: '0.9rem' }}>{j.apellido}</td>
+                      <td style={{ padding: '12px', fontSize: '0.9rem' }}>{j.nombre}{j.apellido ? ' ' + j.apellido : ''}</td>
                       <td style={{ padding: '12px', fontSize: '0.9rem' }}>{j.telefono}</td>
                       <td style={{ padding: '12px', fontSize: '0.9rem', textTransform: 'capitalize' }}>{j.juego}</td>
                       <td style={{ padding: '12px', fontSize: '0.9rem', fontWeight: 'bold', color: j.resultado === 'Ganó' ? '#10b981' : (j.resultado === 'Perdió' ? '#ef4444' : 'var(--text-muted)') }}>{j.resultado || '-'}</td>
