@@ -263,7 +263,7 @@ export default function Reflejos({ onVolver, onResultado }: ReflejosProps) {
           <div 
             className="arena-punteria" 
             ref={areaRef}
-            onPointerDown={handleArenaClick}
+            onClick={handleArenaClick}
           >
             {objetivoActual && (
               <div 
@@ -274,7 +274,7 @@ export default function Reflejos({ onVolver, onResultado }: ReflejosProps) {
                   width: `${objetivoActual.tamano}px`,
                   height: `${objetivoActual.tamano}px`
                 }}
-                onPointerDown={(e) => handleClickObjetivo(e as any, objetivoActual.id)}
+                onClick={(e) => handleClickObjetivo(e as any, objetivoActual.id)}
               >
                 <img src={esferaImg} alt="Objetivo" draggable={false} className="target-sphere-img" />
               </div>

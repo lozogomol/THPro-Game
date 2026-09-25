@@ -254,7 +254,7 @@ export default function Secuencia({ onVolver, onResultado }: SecuenciaProps) {
 
             <div className="metric-chip">
               <span className="metric-label">Ronda</span>
-              <span className="metric-val">{rondaActual} / {config.metaRondas}</span>
+              <span className="metric-val">{secuencia.length > 0 ? secuencia.length : 1} / {config.metaRondas}</span>
               
           </div>
           <div className="metric-chip">
@@ -290,7 +290,7 @@ export default function Secuencia({ onVolver, onResultado }: SecuenciaProps) {
                 </button>
               ))}
               <div className="simon-center-circle">
-                <span className="center-score">{rondaActual}</span>
+                <span className="center-score">{secuencia.length > 0 ? secuencia.length : 1}</span>
                 <span className="center-label">NIVEL</span>
               </div>
             </div>
