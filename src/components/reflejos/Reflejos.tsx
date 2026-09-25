@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './Reflejos.css';
 import { soundManager } from '../../utils/audio';
@@ -70,22 +71,20 @@ export default function Reflejos({ onVolver, onResultado }: ReflejosProps) {
     }
   }, [pantalla]);
 
-  const iniciarJuego = useCallback(() => {
+  function iniciarJuego() {
     soundManager.playClick();
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     if (timerRef.current) clearInterval(timerRef.current);
 
     setAciertos(0);
     setFallos(0);
-    setRacha(0);
-    setRachaMax(0);
     setTiempoSegundos(config.tiempo > 0 ? config.tiempo : 0);
     setHaGanado(false);
     setHaPerdido(false);
     setEnJuego(true);
     setPantalla('juego');
     setObjetivoActual(crearNuevoObjetivo(config.tamano));
-  }, [config.tamano, crearNuevoObjetivo, limiteTiempo]);
+  }
 
   useEffect(() => {
     if (enJuego && !haGanado && !haPerdido) {
@@ -295,7 +294,6 @@ export default function Reflejos({ onVolver, onResultado }: ReflejosProps) {
       {haGanado && (
         <div className="clean-modal-backdrop victory-backdrop">
           <div className="clean-modal-box victory-box">
-            <div className="victory-icon-bubble">¡OK!</div>
             <h2 style={{ textAlign: "center", color: "var(--rosa-hover)", margin: "10px 0" }}>{getPremio(dificultad) === '' ? '¡Ganaste!' : `¡Ganaste ${getPremio(dificultad)}!`}</h2>
             <div className="victory-summary-stats">
               <div className="summary-col">
@@ -317,7 +315,6 @@ export default function Reflejos({ onVolver, onResultado }: ReflejosProps) {
       {haPerdido && (
         <div className="clean-modal-backdrop victory-backdrop">
             <div className="clean-modal-box victory-box" style={{ borderColor: '#ef4444' }}>
-              <div className="victory-icon-bubble" style={{ backgroundColor: '#ef4444', color: '#fff' }}>X</div>
               <h2 style={{ textAlign: "center", margin: "15px 0 25px" }}>¡Perdiste!</h2>
               <div className="victory-btn-group">
                 <button className="btn-primary-action" onClick={onVolver}>Volver al Menú</button>

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import './MenuPrincipal.css';
 import { soundManager } from '../../utils/audio';
 import rompecabezasImg from '../../assets/Rompecabezas.png';

@@ -58,7 +58,7 @@ export default function App() {
     const guardados = localStorage.getItem('thpro_jugadores');
     if (guardados) {
       const lista = JSON.parse(guardados);
-      const idx = lista.findIndex((j: any) => j.id === jugadorActivoId);
+      const idx = lista.findIndex((j: { id: string; resultado: string; premio: string }) => j.id === jugadorActivoId);
       if (idx !== -1) {
         lista[idx].resultado = victoria ? 'Ganó' : 'Perdió';
         lista[idx].premio = victoria ? premio : '-';

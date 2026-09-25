@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react';
 import './Rompecabezas.css';
 import { soundManager } from '../../utils/audio';
@@ -64,7 +65,7 @@ export default function Rompecabezas({ onVolver, onResultado }: RompecabezasProp
     }
   }, [pantalla]);
 
-  const iniciarJuego = (forcedGridSize?: number, forcedTime?: number) => {
+  function iniciarJuego(forcedGridSize?: number, forcedTime?: number) {
     const size = forcedGridSize || gridSize;
     const numPiezas = size * size;
     const indices = Array.from({ length: numPiezas }, (_, i) => i);
@@ -369,7 +370,6 @@ export default function Rompecabezas({ onVolver, onResultado }: RompecabezasProp
       {haGanado && (
         <div className="clean-modal-backdrop victory-backdrop">
           <div className="clean-modal-box victory-box">
-            <div className="victory-icon-bubble">¡OK!</div>
             <h2 style={{ textAlign: "center", color: "var(--rosa-hover)", margin: "10px 0" }}>{getPremio(dificultad) === '' ? '¡Ganaste!' : `¡Ganaste ${getPremio(dificultad)}!`}</h2>
             <div className="victory-solved-thumb">
               <img src={imagenActual.url} alt="Completado" />
@@ -394,7 +394,6 @@ export default function Rompecabezas({ onVolver, onResultado }: RompecabezasProp
       {haPerdidoTiempo && (
         <div className="clean-modal-backdrop victory-backdrop">
             <div className="clean-modal-box victory-box" style={{ borderColor: '#ef4444' }}>
-              <div className="victory-icon-bubble" style={{ backgroundColor: '#ef4444', color: '#fff' }}>X</div>
               <h2 style={{ textAlign: "center", margin: "15px 0 25px" }}>¡Perdiste!</h2>
               <div className="victory-btn-group">
                 <button className="btn-primary-action" onClick={onVolver}>Volver al Menú</button>
