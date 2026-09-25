@@ -123,3 +123,140 @@ button.btn-rosa:active {
   border-color: var(--rosa-hover);
   color: var(--rosa-hover);
 }
+.clean-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.clean-modal-box {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  border: 1px solid var(--border-light);
+  max-width: 500px;
+  width: 100%;
+  overflow: hidden;
+  animation: modalEnter 0.25s ease-out;
+}
+
+@keyframes modalEnter {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.clean-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.clean-modal-header h3 {
+  font-size: 1.1rem;
+  color: var(--text-main);
+}
+
+.btn-close-modal {
+  font-size: 1.2rem;
+  color: var(--text-dim);
+}
+
+.modal-full-img {
+  width: 100%;
+  display: block;
+}
+
+.victory-box {
+  padding: 36px 28px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.victory-icon-bubble {
+  font-size: 1.35rem;
+  font-weight: 800;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--rosa);
+  color: var(--rosa-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.victory-box h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.victory-box p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.victory-solved-thumb {
+  width: 150px;
+  height: 150px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid var(--celeste);
+}
+
+.victory-solved-thumb img {
+  width: 100%;
+  
+  object-fit: cover;
+}
+
+.victory-summary-stats {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border-light);
+}
+
+.summary-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.sum-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.sum-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.text-capitalize {
+  text-transform: capitalize;
+}
+
+.victory-btn-group {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 6px;
+}
