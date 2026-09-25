@@ -113,7 +113,6 @@ export default function Reflejos({ onVolver, onResultado }: ReflejosProps) {
   useEffect(() => {
     if (!enJuego || haGanado || haPerdido || !objetivoActual) return;
     timeoutRef.current = window.setTimeout(() => {
-      setFallos((prev) => prev + 1);
       setRacha(0);
       generarObjetivo();
     }, config.tiempoObjetivoMs);
@@ -122,13 +121,13 @@ export default function Reflejos({ onVolver, onResultado }: ReflejosProps) {
 
   
   useEffect(() => {
-    if (enJuego && (dificultad === 'talentoso' || dificultad === 'maestro') && fallos >= 2 && !haPerdido && !haGanado) {
+    if (enJuego && fallos >= 3 && !haPerdido && !haGanado) {
       setHaPerdido(true);
       setEnJuego(false);
       onResultado(false, '');
       if (timerRef.current) clearInterval(timerRef.current);
     }
-  }, [fallos, enJuego, dificultad, haPerdido, haGanado, onResultado]);
+  }, [fallos, enJuego, haPerdido, haGanado, onResultado]);
 
   const getPremio = (dif: string) => {
     if (dif === 'facil' || dif === 'aprendiz') return '';
@@ -244,6 +243,14 @@ export default function Reflejos({ onVolver, onResultado }: ReflejosProps) {
               <span className="metric-label">{limiteTiempo > 0 ? 'Tiempo Restante' : 'Tiempo'}</span>
               <span className={`metric-val ${limiteTiempo > 0 && tiempoSegundos <= 10 ? 'time-warning' : ''}`}>
                 {formatoTiempo(tiempoSegundos)}
+              </span>
+            </div>
+            <div className="metric-chip">
+              <span className="metric-label">Vidas</span>
+              <span className="metric-val" style={{ color: '#ff0000', letterSpacing: '2px', fontSize: '1.4em', textShadow: '0 0 2px rgba(255,0,0,0.3)' }}>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <span key={i} style={{ opacity: i < (3 - fallos) ? 1 : 0.2 }}>❤</span>
+                ))}
               </span>
             </div>
           </div>
