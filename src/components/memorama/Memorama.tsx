@@ -136,42 +136,48 @@ export default function Memorama({ onVolver, onResultado }: MemoramaProps) {
 
   const manejarClickCarta = (index: number) => {
     if (!enJuego || bloqueo || haGanado || haPerdido) return;
-    if (cartasVolteadas.includes(index) || cartasEncontradas.includes(index)) return;
 
-    soundManager.playClick();
-    const nuevasVolteadas = [...cartasVolteadas, index];
-    setCartasVolteadas(nuevasVolteadas);
+    setCartasVolteadas((prevVolteadas) => {
+      if (prevVolteadas.includes(index) || cartasEncontradas.includes(index)) return prevVolteadas;
+      if (prevVolteadas.length >= 2) return prevVolteadas; // Prevent more than 2 flips
 
-    if (nuevasVolteadas.length === 2) {
-      setBloqueo(true);
-      setMovimientos((m) => m + 1);
+      soundManager.playClick();
+      const nuevasVolteadas = [...prevVolteadas, index];
 
-      const carta1 = cartas[nuevasVolteadas[0]];
-      const carta2 = cartas[nuevasVolteadas[1]];
+      if (nuevasVolteadas.length === 2) {
+        setBloqueo(true);
+        setMovimientos((m) => m + 1);
 
-      if (carta1.imgUrl === carta2.imgUrl) {
-        soundManager.playMatch();
-        setTimeout(() => {
-          const nuevasEncontradas = [...cartasEncontradas, nuevasVolteadas[0], nuevasVolteadas[1]];
-          setCartasEncontradas(nuevasEncontradas);
-          setCartasVolteadas([]);
-          setBloqueo(false);
+        const carta1 = cartas[nuevasVolteadas[0]];
+        const carta2 = cartas[nuevasVolteadas[1]];
 
-          if (nuevasEncontradas.length === cartas.length) {
-            setHaGanado(true);
-            setEnJuego(false);
-            onResultado(true, getPremio(dificultad));
-            soundManager.playVictory();
-          }
-        }, 600);
-      } else {
-        soundManager.playError();
-        setTimeout(() => {
-          setCartasVolteadas([]);
-          setBloqueo(false);
-        }, 1000);
+        if (carta1.imgUrl === carta2.imgUrl) {
+          soundManager.playMatch();
+          setTimeout(() => {
+            setCartasEncontradas((prevEncontradas) => {
+              const nuevasEncontradas = [...prevEncontradas, nuevasVolteadas[0], nuevasVolteadas[1]];
+              if (nuevasEncontradas.length === cartas.length) {
+                setHaGanado(true);
+                setEnJuego(false);
+                onResultado(true, getPremio(dificultad));
+                soundManager.playVictory();
+              }
+              return nuevasEncontradas;
+            });
+            setCartasVolteadas([]);
+            setBloqueo(false);
+          }, 600);
+        } else {
+          soundManager.playError();
+          setTimeout(() => {
+            setCartasVolteadas([]);
+            setBloqueo(false);
+          }, 1000);
+        }
       }
-    }
+
+      return nuevasVolteadas;
+    });
   };
 
   const handleSeleccionarNivel = (nivel: DificultadMemorama) => {

@@ -142,46 +142,48 @@ export default function Secuencia({ onVolver, onResultado }: SecuenciaProps) {
     soundManager.playClick();
     setTimeout(() => setPadActivo(null), 200);
 
-    if (id === secuencia[pasoUsuario]) {
-      const siguientePaso = pasoUsuario + 1;
-      setPasoUsuario(siguientePaso);
-      if (siguientePaso === secuencia.length) {
-        if (secuencia.length >= config.metaRondas) {
-          setHaGanado(true);
-          setTurnoJugador(false);
-          setEnJuego(false);
-          onResultado(true, getPremio(dificultad));
-          soundManager.playVictory();
-        } else {
-          setTurnoJugador(false);
-          setRondaActual((prev) => prev + 1);
-          setTimeout(() => {
-            const nuevoPaso = Math.floor(Math.random() * 4);
-            const nuevaSecuencia = [...secuencia, nuevoPaso];
-            setSecuencia(nuevaSecuencia);
-            reproducirSecuencia(nuevaSecuencia);
-          }, 800);
+    setPasoUsuario((prevPaso) => {
+      if (id === secuencia[prevPaso]) {
+        const siguientePaso = prevPaso + 1;
+        if (siguientePaso === secuencia.length) {
+          if (secuencia.length >= config.metaRondas) {
+            setHaGanado(true);
+            setTurnoJugador(false);
+            setEnJuego(false);
+            onResultado(true, getPremio(dificultad));
+            soundManager.playVictory();
+          } else {
+            setTurnoJugador(false);
+            setRondaActual((prev) => prev + 1);
+            setTimeout(() => {
+              const nuevoPaso = Math.floor(Math.random() * 4);
+              const nuevaSecuencia = [...secuencia, nuevoPaso];
+              setSecuencia(nuevaSecuencia);
+              reproducirSecuencia(nuevaSecuencia);
+            }, 800);
+          }
         }
-      }
-    } else {
-      soundManager.playLocked();
-      setFallos(prev => {
-        const nuevosFallos = prev + 1;
-        if (nuevosFallos >= 2) {
-          setHaFallado(true);
+        return siguientePaso;
+      } else {
+        soundManager.playLocked();
+        setFallos(prev => {
+          const nuevosFallos = prev + 1;
+          if (nuevosFallos >= 2) {
+            setHaFallado(true);
+            setTurnoJugador(false);
+            setEnJuego(false);
+            onResultado(false, '');
+            if (timerRef.current) clearInterval(timerRef.current);
+            return nuevosFallos;
+          }
+          // Resume! Repeat sequence for them
           setTurnoJugador(false);
-          setEnJuego(false);
-          onResultado(false, '');
-          if (timerRef.current) clearInterval(timerRef.current);
+          setTimeout(() => reproducirSecuencia(secuencia), 500);
           return nuevosFallos;
-        }
-        // Resume! Repeat sequence for them
-        setTurnoJugador(false);
-        setPasoUsuario(0);
-        setTimeout(() => reproducirSecuencia(secuencia), 500);
-        return nuevosFallos;
-      });
-    }
+        });
+        return 0; // Reset pasoUsuario for next attempt
+      }
+    });
   };
 
   const formatoTiempo = (segundos: number): string => {

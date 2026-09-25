@@ -147,20 +147,26 @@ export default function Reflejos({ onVolver, onResultado }: ReflejosProps) {
       setObjetivoActual(null);
       soundManager.playMatch();
       
-      const nuevosAciertos = aciertos + 1;
-      const nuevaRacha = racha + 1;
-      setAciertos(nuevosAciertos);
-      setRacha(nuevaRacha);
-      if (nuevaRacha > rachaMax) setRachaMax(nuevaRacha);
+      setAciertos((prevAciertos) => {
+        const nuevosAciertos = prevAciertos + 1;
+        
+        if (nuevosAciertos >= config.metaAciertos) {
+          setHaGanado(true);
+          setEnJuego(false);
+          onResultado(true, getPremio(dificultad));
+          soundManager.playVictory();
+        } else {
+          generarObjetivo();
+        }
+        
+        return nuevosAciertos;
+      });
 
-      if (nuevosAciertos >= config.metaAciertos) {
-        setHaGanado(true);
-        setEnJuego(false);
-        onResultado(true, getPremio(dificultad));
-        soundManager.playVictory();
-      } else {
-        generarObjetivo();
-      }
+      setRacha((prevRacha) => {
+        const nuevaRacha = prevRacha + 1;
+        setRachaMax((prevMax) => (nuevaRacha > prevMax ? nuevaRacha : prevMax));
+        return nuevaRacha;
+      });
     }
   };
 
